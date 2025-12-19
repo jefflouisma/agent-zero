@@ -16,9 +16,39 @@ export async function callJsonApi(endpoint, data) {
   });
 
   if (!response.ok) {
-    const error = await response.text();
+    let error = await response.text();
+    try {
+      const errorJson = JSON.parse(error);
+      if (errorJson.error) error = errorJson.error;
+      else if (errorJson.message) error = errorJson.message;
+    } catch (e) {
+      // ignore, use raw text
+    }
     throw new Error(error);
   }
+
+  // Check for empty response
+  const contentLength = response.headers.get("Content-Length");
+  if (response.status === 204 || contentLength === "0") {
+    return null;
+  }
+
+  // Check content type before parsing as JSON
+  const contentType = response.headers.get("content-type");
+  if (!contentType || !contentType.includes("application/json")) {
+      // If not JSON, return text or null depending on needs, 
+      // but for callJsonApi implies JSON expected. 
+      // However, sometimes APIs return text for success.
+      // Let's try to peek.
+      const text = await response.text();
+      try {
+          return JSON.parse(text);
+      } catch (e) {
+          // If it's not JSON, return the text content if it exists
+          return text || null; 
+      }
+  }
+
   const jsonResponse = await response.json();
   return jsonResponse;
 }
@@ -87,7 +117,14 @@ async function getCsrfToken() {
     window.location.href = response.url;
     return;
   }
-  const json = await response.json();
+  let json;
+  try {
+    const text = await response.text();
+    json = JSON.parse(text);
+  } catch (e) {
+    throw new Error("Failed to parse CSRF token response: " + e.message);
+  }
+  
   if (json.ok) {
     csrfToken = json.token;
     document.cookie = `csrf_token_${json.runtime_id}=${csrfToken}; SameSite=Strict; Path=/`;

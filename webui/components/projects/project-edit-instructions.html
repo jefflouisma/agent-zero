@@ -11,44 +11,37 @@
     <div x-data>
         <template x-if="$store.projects && $store.projects.selectedProject">
             <div>
-                <!-- <div class="project-detail-header">
-                        <div class="projects-project-card-title">Project details</div>
-                        <div class="project-path" x-text="$store.projects.selectedProject.path"></div>
-                    </div> -->
-
-                <div class="projects-form-group">
-                    <label class="projects-form-label">Description</label>
-                    <span class="projects-form-description">Describe the project. This helps both you and the agent
-                        understand the project context.</span>
-                    <textarea class="projects-form-textarea" x-model="$store.projects.selectedProject.description"
+                <div class="mb-4">
+                    <label class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Description</label>
+                    <p class="mb-2 text-xs text-gray-500 dark:text-gray-400">Describe the project. This helps both you and the agent understand the project context.</p>
+                    <textarea class="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" 
+                        x-model="$store.projects.selectedProject.description"
                         rows="5" placeholder="Enter project description"></textarea>
                 </div>
 
-                <div class="projects-form-group">
-                    <label class="projects-form-label">Instructions</label>
-                    <span class="projects-form-description">Provide specific instructions for the agent related to this
-                        project.</span>
-                    <textarea class="projects-form-textarea"
+                <div class="mb-4">
+                    <label class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Instructions</label>
+                    <p class="mb-2 text-xs text-gray-500 dark:text-gray-400">Provide specific instructions for the agent related to this project.</p>
+                    <textarea class="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500 font-mono"
                         x-model="$store.projects.selectedProject.instructions" rows="15"
                         placeholder="Enter project instructions"></textarea>
                 </div>
 
-                <div class="projects-form-group">
-                    <label class="projects-form-label">Instruction files</label>
-                    <div class="projects-input-with-button-wrapper">
-                        <span class="projects-form-description">Additional instruction files in <strong><span
-                                    x-text="$store.projects.getSelectedAbsPath('.a0proj','instructions')"></span></strong>. Only text files are currently supported (txt, md, yaml, no PDFs or images).</span>
-                        <span class="projects-form-description">Currently there are <strong><span
-                                    x-text="$store.projects.selectedProject.instruction_files_count || 0"></span></strong> instruction files.</span>
-                        <button class="button icon-button" x-on:click="$store.projects.browseInstructionFiles()">
-                            <span class="icon material-symbols-outlined">folder</span>
-                            <span>Browse</span>
-                        </button>
+                <div class="mb-4">
+                    <label class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Instruction files</label>
+                    <div class="flex flex-col gap-2">
+                        <p class="text-xs text-gray-500 dark:text-gray-400">Additional instruction files in <strong class="text-gray-900 dark:text-white"><span x-text="$store.projects.getSelectedAbsPath('.a0proj','instructions')"></span></strong>. Only text files are currently supported (txt, md, yaml, no PDFs or images).</p>
+                        <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg border border-gray-200 dark:bg-gray-700 dark:border-gray-600">
+                            <p class="text-sm text-gray-700 dark:text-gray-300">Currently there are <strong class="text-gray-900 dark:text-white"><span x-text="$store.projects.selectedProject.instruction_files_count || 0"></span></strong> instruction files.</p>
+                            <button class="py-2 px-3 text-sm font-medium text-gray-900 focus:outline-none bg-white rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-4 focus:ring-gray-200 dark:focus:ring-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700 flex items-center gap-2" 
+                                x-on:click="$store.projects.browseInstructionFiles()">
+                                <span class="material-symbols-outlined text-lg">folder</span>
+                                <span>Browse</span>
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
-
-
         </template>
     </div>
 </body>

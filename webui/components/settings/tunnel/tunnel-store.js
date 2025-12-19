@@ -1,5 +1,6 @@
 import { createStore } from "/js/AlpineStore.js";
 import * as Sleep from "/js/sleep.js";
+import { callJsonApi } from "/js/api.js";
 
 // define the model object holding data and functions
 const model = {
@@ -42,15 +43,7 @@ const model = {
 
   async checkTunnelStatus() {
     try {
-      const response = await fetchApi("/tunnel_proxy", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ action: "get" }),
-      });
-
-      const data = await response.json();
+      const data = await callJsonApi("/tunnel_proxy", { action: "get" });
 
       if (data.success && data.tunnel_url) {
         // Update the stored URL if it's different from what we have
@@ -67,15 +60,7 @@ const model = {
 
         if (storedTunnelUrl) {
           // Use the stored URL but verify it's still valid
-          const verifyResponse = await fetchApi("/tunnel_proxy", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({ action: "verify", url: storedTunnelUrl }),
-          });
-
-          const verifyData = await verifyResponse.json();
+          const verifyData = await callJsonApi("/tunnel_proxy", { action: "verify", url: storedTunnelUrl });
 
           if (verifyData.success && verifyData.is_valid) {
             this.tunnelLink = storedTunnelUrl;
@@ -122,16 +107,9 @@ const model = {
 
       try {
         // First stop any existing tunnel
-        const stopResponse = await fetchApi("/tunnel_proxy", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ action: "stop" }),
-        });
+        const stopData = await callJsonApi("/tunnel_proxy", { action: "stop" });
 
         // Check if stopping was successful
-        const stopData = await stopResponse.json();
         if (!stopData.success) {
           console.warn("Warning: Couldn't stop existing tunnel cleanly");
           // Continue anyway since we want to create a new one
@@ -156,8 +134,7 @@ const model = {
   async generateLink() {
     // First check if authentication is enabled
     try {
-      const authCheckResponse = await fetchApi("/settings_get");
-      const authData = await authCheckResponse.json();
+      const authData = await callJsonApi("/settings_get");
 
       // Find the auth_login and auth_password in the settings
       let hasAuth = false;
@@ -219,19 +196,11 @@ const model = {
 
     try {
       // Call the backend API to create a tunnel
-      const response = await fetchApi("/tunnel_proxy", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          action: "create",
-          provider: this.provider,
-          // port: window.location.port || (window.location.protocol === 'https:' ? 443 : 80)
-        }),
+      const data = await callJsonApi("/tunnel_proxy", {
+        action: "create",
+        provider: this.provider,
+        // port: window.location.port || (window.location.protocol === 'https:' ? 443 : 80)
       });
-
-      const data = await response.json();
 
       if (data.success && data.tunnel_url) {
         // Store the tunnel URL in localStorage for persistence
@@ -257,15 +226,7 @@ const model = {
 
         // Check if tunnel is running now
         try {
-          const statusResponse = await fetchApi("/tunnel_proxy", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({ action: "get" }),
-          });
-
-          const statusData = await statusResponse.json();
+          const statusData = await callJsonApi("/tunnel_proxy", { action: "get" });
 
           if (statusData.success && statusData.tunnel_url) {
             // Tunnel is now running, we can update the UI
@@ -324,15 +285,7 @@ const model = {
 
       try {
         // Call the backend to stop the tunnel
-        const response = await fetchApi("/tunnel_proxy", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ action: "stop" }),
-        });
-
-        const data = await response.json();
+        const data = await callJsonApi("/tunnel_proxy", { action: "stop" });
 
         if (data.success) {
           // Clear the stored URL

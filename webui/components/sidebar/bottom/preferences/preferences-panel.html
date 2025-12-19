@@ -7,109 +7,66 @@
 <body>
   <div x-data>
     <template x-if="$store.preferences">
-      <div class="pref-section">
-        <span>
-          <h3 class="pref-header" 
+      <div class="px-4 py-2 border-t border-gray-200 dark:border-gray-700">
+        <div>
+          <h3 class="flex items-center justify-between text-xs font-semibold text-gray-500 uppercase cursor-pointer hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200" 
               data-bs-toggle="collapse"
               @click="$store.sidebar.toggleSection('preferences')"
-              x-effect="!$store.sidebar.isSectionOpen('preferences') ? $el.classList.add('collapsed') : $el.classList.remove('collapsed')">
+              :class="{'text-gray-400': !$store.sidebar.isSectionOpen('preferences')}">
             Preferences
-            <svg class="arrow-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
-              <path d="M8 4l8 8-8 8" />
+            <svg class="w-4 h-4 transition-transform duration-200" :class="{'rotate-180': $store.sidebar.isSectionOpen('preferences')}" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M19 9l-7 7-7-7" />
             </svg>
           </h3>
-          <ul class="config-list collapse" id="preferences-collapse"
-              x-effect="(() => { const c = bootstrap.Collapse.getOrCreateInstance($el, { toggle: false }); $store.sidebar.isSectionOpen('preferences') ? c.show() : c.hide(); })()">
-            <li x-data>
-              <span>Autoscroll</span>
-              <label class="switch">
-                <input id="auto-scroll-switch" type="checkbox" x-model="$store.preferences.autoScroll">
-                <span class="slider"></span>
+          <ul class="mt-2 space-y-3 transition-all duration-300 ease-in-out" 
+              :class="{'hidden': !$store.sidebar.isSectionOpen('preferences')}"
+              id="preferences-collapse">
+            <li class="flex items-center justify-between">
+              <span class="text-sm text-gray-700 dark:text-gray-300">Autoscroll</span>
+              <label class="relative inline-flex items-center cursor-pointer">
+                <input type="checkbox" x-model="$store.preferences.autoScroll" class="sr-only peer">
+                <div class="w-9 h-5 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
               </label>
             </li>
-            <li x-data>
-              <span class="switch-label">Dark mode</span>
-              <label class="switch">
-                <input type="checkbox" x-model="$store.preferences.darkMode">
-                <span class="slider"></span>
+            <li class="flex items-center justify-between">
+              <span class="text-sm text-gray-700 dark:text-gray-300">Dark mode</span>
+              <label class="relative inline-flex items-center cursor-pointer">
+                <input type="checkbox" x-model="$store.preferences.darkMode" class="sr-only peer">
+                <div class="w-9 h-5 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
               </label>
             </li>
-            <li x-data>
-              <span class="switch-label">Speech</span>
-              <label class="switch">
-                <input type="checkbox" x-model="$store.preferences.speech">
-                <span class="slider"></span>
+            <li class="flex items-center justify-between">
+              <span class="text-sm text-gray-700 dark:text-gray-300">Speech</span>
+              <label class="relative inline-flex items-center cursor-pointer">
+                <input type="checkbox" x-model="$store.preferences.speech" class="sr-only peer">
+                <div class="w-9 h-5 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
               </label>
             </li>
-            <li x-data>
-              <span>Show thoughts</span>
-              <label class="switch">
-                <input type="checkbox" x-model="$store.preferences.showThoughts">
-                <span class="slider"></span>
+            <li class="flex items-center justify-between">
+              <span class="text-sm text-gray-700 dark:text-gray-300">Show thoughts</span>
+              <label class="relative inline-flex items-center cursor-pointer">
+                <input type="checkbox" x-model="$store.preferences.showThoughts" class="sr-only peer">
+                <div class="w-9 h-5 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
               </label>
             </li>
-            <li x-data>
-              <span>Show JSON</span>
-              <label class="switch">
-                <input type="checkbox" x-model="$store.preferences.showJson">
-                <span class="slider"></span>
+            <li class="flex items-center justify-between">
+              <span class="text-sm text-gray-700 dark:text-gray-300">Show JSON</span>
+              <label class="relative inline-flex items-center cursor-pointer">
+                <input type="checkbox" x-model="$store.preferences.showJson" class="sr-only peer">
+                <div class="w-9 h-5 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
               </label>
             </li>
-            <li x-data>
-              <span>Show utility messages</span>
-              <label class="switch">
-                <input type="checkbox" x-model="$store.preferences.showUtils">
-                <span class="slider"></span>
+            <li class="flex items-center justify-between">
+              <span class="text-sm text-gray-700 dark:text-gray-300">Show utility messages</span>
+              <label class="relative inline-flex items-center cursor-pointer">
+                <input type="checkbox" x-model="$store.preferences.showUtils" class="sr-only peer">
+                <div class="w-9 h-5 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
               </label>
             </li>
           </ul>
-        </span>
+        </div>
       </div>
     </template>
   </div>
-
-  <style>
-    .pref-section {
-    font-size: var(--font-size-small);
-    padding: 0.6rem var(--spacing-md) 0.05rem var(--spacing-md);
-    }
-    /* Collapse transition */
-    .pref-section [x-cloak] {
-      display: none;
-    }
-    .pref-section .pref-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 6px;
-      cursor: pointer;
-      user-select: none;
-    }
-    .pref-section .config-list {
-      list-style: none;
-      padding: 0.05rem 0;
-      margin: 0;
-      display: flex;
-      flex-direction: column;
-      gap: 1px;
-    }
-    #preferences-collapse li {
-    opacity: 0.8;
-    }
-    .pref-section .switch-label,
-    .pref-section span {
-      font-size: 0.8rem;
-    }
-    .pref-section .switch {
-      position: relative;
-      display: inline-block;
-      width: 35px;
-      height: 19px;
-      margin-left: auto;
-    }
-    .pref-section li { display: flex; align-items: center; }
-  </style>
 </body>
 </html>
-
-

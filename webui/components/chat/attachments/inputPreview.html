@@ -6,22 +6,21 @@
 <div x-data>
     <template x-if="$store.chatAttachments">
 
-        <div x-show="$store.chatAttachments.hasAttachments" class="preview-section">
+        <div x-show="$store.chatAttachments.hasAttachments" class="flex flex-wrap gap-3 p-3 mb-2 bg-gray-50 border border-gray-200 rounded-lg dark:bg-gray-800 dark:border-gray-700">
             <template x-for="(attachment, index) in $store.chatAttachments.attachments" :key="index">
-                <div class="attachment-item"
-                    :class="{'image-type': attachment.type === 'image', 'file-type': attachment.type === 'file'}">
+                <div class="relative group w-24 h-24 bg-white border border-gray-200 rounded-md shadow-sm dark:bg-gray-700 dark:border-gray-600 flex items-center justify-center overflow-hidden">
                     <template x-if="attachment.type === 'image'">
-                        <img :src="attachment.url" class="attachment-preview" :alt="attachment.name" style="cursor: pointer;"
+                        <img :src="attachment.url" class="object-cover w-full h-full cursor-pointer hover:opacity-90 transition-opacity" :alt="attachment.name"
                             @click="$store.imageViewer.open(attachment.url, { name: attachment.name })">
                     </template>
                     <template x-if="attachment.type === 'file'">
-                        <div>
-                            <img :src="attachment.displayInfo.previewUrl" class="file-icon" :alt="attachment.extension">
-                            <span class="file-title" x-text="attachment.name"></span>
+                        <div class="flex flex-col items-center justify-center p-2 text-center w-full h-full">
+                            <img :src="attachment.displayInfo.previewUrl" class="w-8 h-8 mb-1" :alt="attachment.extension">
+                            <span class="text-xs text-gray-600 truncate w-full px-1 dark:text-gray-300" x-text="attachment.name" :title="attachment.name"></span>
                         </div>
                     </template>
                     <button @click="$store.chatAttachments.removeAttachment(index)"
-                        class="remove-attachment">&times;</button>
+                        class="absolute -top-2 -right-2 w-5 h-5 flex items-center justify-center bg-red-500 hover:bg-red-600 text-white rounded-full shadow-md text-xs transition-transform transform hover:scale-110 focus:outline-none">&times;</button>
                 </div>
             </template>
         </div>

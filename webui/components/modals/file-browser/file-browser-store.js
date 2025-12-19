@@ -1,5 +1,5 @@
 import { createStore } from "/js/AlpineStore.js";
-import { fetchApi } from "/js/api.js";
+import { fetchApi, callJsonApi } from "/js/api.js";
 
 // Model migrated from legacy file_browser.js (lift-and-shift)
 const model = {
@@ -133,16 +133,15 @@ const model = {
   async fetchFiles(path = "") {
     this.isLoading = true;
     try {
-      const response = await fetchApi(
+      const data = await callJsonApi(
         `/get_work_dir_files?path=${encodeURIComponent(path)}`
       );
-      if (response.ok) {
-        const data = await response.json();
+      if (data && data.data) {
         this.browser.entries = data.data.entries;
         this.browser.currentPath = data.data.current_path;
         this.browser.parentPath = data.data.parent_path;
       } else {
-        console.error("Error fetching files:", await response.text());
+        console.error("Error fetching files: Invalid response data", data);
         this.browser.entries = [];
       }
     } catch (e) {

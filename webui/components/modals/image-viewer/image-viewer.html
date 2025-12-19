@@ -1,149 +1,51 @@
 <html>
-
 <head>
     <title>Image Viewer</title>
-
     <script type="module">
         import { store } from "/components/modals/image-viewer/image-viewer-store.js";
     </script>
 </head>
-
 <body>
-    <div x-data>
+    <div x-data class="h-full">
         <template x-if="$store.imageViewer">
-            <div id="image-viewer-wrapper" class="image-modal-container">
+            <div id="image-viewer-wrapper" class="relative flex flex-col items-center justify-center w-full h-full bg-gray-100 dark:bg-gray-900 overflow-hidden">
                 <!-- Image display area -->
-                <div class="image-display-wrapper">
+                <div class="relative flex items-center justify-center w-full h-full p-4 overflow-auto">
                     <img 
                         x-show="$store.imageViewer.currentImageUrl" 
                         :src="$store.imageViewer.currentImageUrl" 
                         :alt="$store.imageViewer.currentImageName || 'Image'"
-                        class="modal-image"
+                        class="max-w-full max-h-full object-contain transition-transform duration-200 ease-out cursor-grab active:cursor-grabbing"
                         @load="$store.imageViewer.imageLoaded = true"
                         @error="$store.imageViewer.imageError = true"
                     />
                     
                     <!-- Loading indicator -->
-                    <div x-show="!$store.imageViewer.imageLoaded && !$store.imageViewer.imageError" class="loading-indicator">
-                        <div class="loading-spinner"></div>
+                    <div x-show="!$store.imageViewer.imageLoaded && !$store.imageViewer.imageError" class="absolute flex flex-col items-center justify-center text-gray-500 dark:text-gray-400">
+                        <div class="w-10 h-10 border-4 border-gray-200 border-t-blue-600 rounded-full animate-spin mb-3 dark:border-gray-700 dark:border-t-blue-500"></div>
                         <p>Loading image...</p>
                     </div>
                     
                     <!-- Error indicator -->
-                    <div x-show="$store.imageViewer.imageError" class="error-indicator">
-                        <p>Failed to load image</p>
+                    <div x-show="$store.imageViewer.imageError" class="absolute flex flex-col items-center justify-center text-red-500 dark:text-red-400">
+                        <p class="font-medium">Failed to load image</p>
                     </div>
                 </div>
 
                 <!-- Simple zoom controls -->
-                <div class="zoom-controls">
-                    <button @click="$store.imageViewer.zoomOut()" class="zoom-btn" title="Zoom Out">−</button>
-                    <button @click="$store.imageViewer.resetZoom()" class="zoom-btn" title="Reset">⌂</button>
-                    <button @click="$store.imageViewer.zoomIn()" class="zoom-btn" title="Zoom In">+</button>
+                <div class="absolute bottom-5 right-5 flex items-center gap-1 p-1.5 bg-black/60 backdrop-blur-sm rounded-lg shadow-lg">
+                    <button @click="$store.imageViewer.zoomOut()" class="w-8 h-8 flex items-center justify-center text-white hover:bg-white/20 rounded transition-colors" title="Zoom Out">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-5 h-5"><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                    </button>
+                    <button @click="$store.imageViewer.resetZoom()" class="w-8 h-8 flex items-center justify-center text-white hover:bg-white/20 rounded transition-colors" title="Reset">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-5 h-5"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+                    </button>
+                    <button @click="$store.imageViewer.zoomIn()" class="w-8 h-8 flex items-center justify-center text-white hover:bg-white/20 rounded transition-colors" title="Zoom In">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-5 h-5"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                    </button>
                 </div>
             </div>
         </template>
     </div>
-
-    <style>
-        .image-modal-container {
-            width: 100%;
-            height: 100%;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            position: relative;
-            background: var(--color-bg-secondary);
-        }
-
-        .image-display-wrapper {
-            flex: 1;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            overflow: auto;
-            width: 100%;
-            height: 100%;
-            position: relative;
-        }
-
-        .modal-image {
-            max-width: 100%;
-            max-height: 100%;
-            object-fit: contain;
-            transition: transform 0.2s ease;
-            cursor: grab;
-        }
-
-        .modal-image:active {
-            cursor: grabbing;
-        }
-
-        .loading-indicator, .error-indicator {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            color: var(--color-text-secondary);
-        }
-
-        .loading-spinner {
-            width: 40px;
-            height: 40px;
-            border: 3px solid var(--color-border);
-            border-top: 3px solid var(--color-primary);
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-            margin-bottom: 10px;
-        }
-
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-
-        .zoom-controls {
-            position: absolute;
-            bottom: 20px;
-            right: 20px;
-            display: flex;
-            align-items: center;
-            gap: 4px;
-            background: rgba(0, 0, 0, 0.6);
-            padding: 6px;
-            border-radius: 12px;
-            backdrop-filter: blur(5px);
-        }
-
-        .zoom-btn {
-            background: transparent;
-            border: none;
-            color: white;
-            cursor: pointer;
-            padding: 6px 10px;
-            border-radius: 6px;
-            font-size: 16px;
-            font-weight: 500;
-            min-width: 32px;
-            height: 32px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: background-color 0.2s ease;
-        }
-
-        .zoom-btn:hover {
-            background: rgba(255, 255, 255, 0.15);
-        }
-
-        /* Dark mode adjustments */
-        .dark-mode .image-modal-container {
-            background: var(--color-bg-secondary);
-        }
-    </style>
-
 </body>
-
 </html>
-

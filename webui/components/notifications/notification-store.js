@@ -347,20 +347,33 @@ const model = {
   // Get CSS class for notification type
   getNotificationClass(type) {
     const classes = {
-      info: "notification-info",
-      success: "notification-success",
-      warning: "notification-warning",
-      error: "notification-error",
-      progress: "notification-progress",
+      info: "border-l-4 border-blue-500 dark:border-blue-500",
+      success: "border-l-4 border-green-500 dark:border-green-500",
+      warning: "border-l-4 border-yellow-500 dark:border-yellow-500",
+      error: "border-l-4 border-red-500 dark:border-red-500",
+      progress: "border-l-4 border-purple-500 dark:border-purple-500",
     };
-    return classes[type] || "notification-info";
+    return classes[type] || classes.info;
+  },
+
+  // Get CSS class for notification icon container
+  getNotificationIconClass(type) {
+    const classes = {
+      info: "text-blue-500 bg-blue-100 dark:bg-blue-800 dark:text-blue-200",
+      success: "text-green-500 bg-green-100 dark:bg-green-800 dark:text-green-200",
+      warning: "text-yellow-500 bg-yellow-100 dark:bg-yellow-800 dark:text-yellow-200",
+      error: "text-red-500 bg-red-100 dark:bg-red-800 dark:text-red-200",
+      progress: "text-purple-500 bg-purple-100 dark:bg-purple-800 dark:text-purple-200",
+    };
+    return classes[type] || classes.info;
   },
 
   // Get CSS class for notification item including read state
   getNotificationItemClass(notification) {
-    const typeClass = this.getNotificationClass(notification.type);
-    const readClass = notification.read ? "read" : "unread";
-    return `notification-item ${typeClass} ${readClass}`;
+    // Base classes for the list item in notification modal
+    const baseClasses = "flex items-start gap-2.5 p-4 border-b border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors";
+    const readClass = notification.read ? "opacity-75" : "bg-blue-50/30 dark:bg-blue-900/10";
+    return `${baseClasses} ${readClass}`;
   },
 
   // Get icon for notification type (Google Material Icons)

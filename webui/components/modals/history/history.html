@@ -6,102 +6,33 @@
   </script>
 </head>
 <body>
-  <div x-data>
+  <div x-data class="h-full">
     <template x-if="$store.history">
-      <div class="history-modal-root">
+      <div class="flex flex-col w-full h-full min-h-[400px]">
         
         <!-- Loading State -->
         <template x-if="$store.history.isLoading">
-          <div class="loading-state">
-            <div class="loading-spinner"></div>
-            <p>Loading history…</p>
+          <div class="flex flex-col items-center justify-center flex-1 p-8">
+            <div class="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-600 mb-4"></div>
+            <p class="text-gray-500 dark:text-gray-400">Loading history…</p>
           </div>
         </template>
         
         <!-- Error State -->
         <template x-if="$store.history.error">
-          <div class="error-state">
-            <p class="error-message" x-text="$store.history.error"></p>
+          <div class="flex flex-col items-center justify-center flex-1 p-8">
+            <p class="text-red-500 font-medium" x-text="$store.history.error"></p>
           </div>
         </template>
         
         <!-- Content (ACE Editor) -->
         <template x-if="!$store.history.isLoading && !$store.history.error">
-          <div id="history-viewer-container"></div>
+          <div id="history-viewer-container" class="w-full h-[71vh] rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden"></div>
         </template>
         
       </div>
     </template>
   </div>
-
-  <style>
-    .history-modal-root {
-      display: flex;
-      flex-direction: column;
-      width: 100%;
-      height: 100%;
-      min-height: 400px;
-    }
-
-    .loading-state,
-    .error-state {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      padding: var(--spacing-lg);
-      min-height: 200px;
-    }
-
-    .loading-spinner {
-      width: 40px;
-      height: 40px;
-      border: 3px solid var(--color-border);
-      border-top: 3px solid var(--color-primary);
-      border-radius: 50%;
-      animation: spin 1s linear infinite;
-      margin-bottom: var(--spacing-md);
-    }
-
-    @keyframes spin {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
-    }
-
-    .loading-state p,
-    .error-state p {
-      color: var(--color-text-secondary);
-      margin: 0;
-    }
-
-    .error-message {
-      color: var(--color-error);
-      font-weight: 500;
-    }
-
-    /* ACE Editor Container */
-    #history-viewer-container {
-      width: 100%;
-      height: 71vh;
-      border-radius: 0.4rem;
-      overflow: auto;
-    }
-
-    #history-viewer-container::-webkit-scrollbar {
-      width: 0;
-    }
-
-    /* ACE Editor Scrollbar */
-    .ace_scrollbar-v {
-      overflow-y: auto;
-    }
-
-    /* Viewer Styles (legacy parity) */
-    .history-modal-root {
-      overflow: hidden;
-    }
-  </style>
-
 </body>
 </html>
 

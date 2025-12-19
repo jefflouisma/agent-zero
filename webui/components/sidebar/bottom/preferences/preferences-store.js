@@ -94,10 +94,13 @@ const model = {
   },
 
   _applyDarkMode(value) {
+    // Tailwind uses 'dark' class (not 'dark-mode') to trigger dark: variants
     if (value) {
+      document.documentElement.classList.add("dark");
       document.body.classList.remove("light-mode");
       document.body.classList.add("dark-mode");
     } else {
+      document.documentElement.classList.remove("dark");
       document.body.classList.remove("dark-mode");
       document.body.classList.add("light-mode");
     }

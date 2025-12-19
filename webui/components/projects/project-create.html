@@ -11,33 +11,24 @@
     <div x-data>
         <template x-if="$store.projects && $store.projects.selectedProject">
             <div>
-                <div class="project-detail">
-
+                <div class="p-6 bg-white dark:bg-gray-800 rounded-lg">
+                    
                     <x-component path="projects/project-edit-basic-data.html">
                     </x-component>
 
-                        <div class="buttons-right">
-                            <button type="button" class="button cancel"
-                                @click="$store.projects.cancelCreate()">Cancel</button>
-                            <button type="button" class="button confirm" @click="$store.projects.confirmCreate()">Create and
-                                continue</button>
-                        </div>
+                    <div class="flex justify-end gap-3 mt-6 pt-6 border-t border-gray-200 dark:border-gray-700">
+                        <button type="button" class="py-2.5 px-5 text-sm font-medium text-gray-900 focus:outline-none bg-white rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-4 focus:ring-gray-200 dark:focus:ring-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700"
+                            @click="$store.projects.cancelCreate()">Cancel</button>
+                        <button type="button" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800"
+                            @click="$store.projects.confirmCreate()">Create and continue</button>
+                    </div>
                 </div>
-
-
             </div>
         </template>
     </div>
 </body>
-<style>
-    .project-detail {
-        border: 1px solid var(--color-border);
-        border-radius: 0.5em;
-        padding: 1em;
-        margin: 1em;
-        background: var(--color-panel);
-    }
 
+<style>
     .project-detail-header {
         margin-bottom: 1em;
     }

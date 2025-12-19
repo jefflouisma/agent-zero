@@ -6,250 +6,103 @@
     </script>
 </head>
 <body>
-    <div x-data>
+    <div x-data class="flex flex-col h-full">
         <template x-if="$store.backupStore">
-            <div x-init="$store.backupStore.initRestore()" x-destroy="$store.backupStore.onClose()">
+            <div x-init="$store.backupStore.initRestore()" x-destroy="$store.backupStore.onClose()" class="flex flex-col h-full space-y-4">
 
                 <!-- File Upload Section -->
-                <div class="upload-section">
-                    <label for="backup-file" class="upload-label">
+                <div class="p-4 border border-dashed border-gray-300 dark:border-gray-600 rounded-lg text-center hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
+                    <label for="backup-file" class="block mb-2 font-semibold text-gray-900 dark:text-white cursor-pointer">
                         Select Backup File (.zip)
                     </label>
                     <input type="file" id="backup-file" accept=".zip"
+                           class="block w-full text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-50 dark:text-gray-400 focus:outline-none dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400"
                            @change="$store.backupStore.handleFileUpload($event)">
                 </div>
 
-                <!-- Warning Message (only show when backup file is loaded) -->
-                <div x-show="$store.backupStore.backupMetadata" class="restore-warning">
-                    <span class="warning-icon">⚠️</span>
-                    <span class="warning-text">After restoring a backup you will have to restart Agent-Zero to fully load the backed-up configuration (button in the left pane).</span>
-                    <span class="warning-icon">⚠️</span>
+                <!-- Warning Message -->
+                <div x-show="$store.backupStore.backupMetadata" class="flex items-center justify-center p-4 bg-yellow-50 border border-yellow-200 rounded-lg dark:bg-yellow-900/20 dark:border-yellow-800">
+                    <span class="text-xl mr-3">⚠️</span>
+                    <span class="text-sm font-medium text-yellow-800 dark:text-yellow-200 text-center">After restoring a backup you will have to restart Agent-Zero to fully load the backed-up configuration (button in the left pane).</span>
+                    <span class="text-xl ml-3">⚠️</span>
                 </div>
 
-                <!-- File Conflict Policy (Dropdown) -->
-                <div x-show="$store.backupStore.backupMetadata" class="overwrite-policy">
-                    <label class="policy-label">
-                        <span class="policy-label-text">File Conflict Policy:</span>
-                        <select x-model="$store.backupStore.overwritePolicy" class="policy-dropdown">
-                            <option value="overwrite">Overwrite existing files</option>
-                            <option value="skip">Skip existing files</option>
-                            <option value="backup">Backup existing files (.backup.timestamp)</option>
-                        </select>
-                    </label>
+                <!-- File Conflict Policy -->
+                <div x-show="$store.backupStore.backupMetadata" class="flex items-center space-x-2">
+                    <label class="font-semibold text-gray-900 dark:text-white whitespace-nowrap">File Conflict Policy:</label>
+                    <select x-model="$store.backupStore.overwritePolicy" 
+                            class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+                        <option value="overwrite">Overwrite existing files</option>
+                        <option value="skip">Skip existing files</option>
+                        <option value="backup">Backup existing files (.backup.timestamp)</option>
+                    </select>
                 </div>
 
                 <!-- Clean Before Restore Option -->
-                <div x-show="$store.backupStore.backupMetadata" class="clean-before-restore">
-                    <label class="checkbox-label">
-                        <input type="checkbox" x-model="$store.backupStore.cleanBeforeRestore">
-                        <span class="checkbox-text">Clean before restore (delete existing files matching original backup patterns)</span>
+                <div x-show="$store.backupStore.backupMetadata" class="p-3 bg-gray-50 border border-gray-200 rounded-lg dark:bg-gray-800 dark:border-gray-700">
+                    <label class="flex items-center space-x-2 cursor-pointer mb-1">
+                        <input type="checkbox" x-model="$store.backupStore.cleanBeforeRestore" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600">
+                        <span class="font-semibold text-gray-900 dark:text-white">Clean before restore (delete existing files matching original backup patterns)</span>
                     </label>
-                    <div class="clean-description">
+                    <div class="text-xs text-gray-500 dark:text-gray-400 ml-6">
                         When enabled, all existing files matching the original backup patterns will be deleted before restoring files from the archive. This ensures a completely clean restore state.
                     </div>
                 </div>
 
                 <!-- Loading indicator -->
-                <div x-show="$store.backupStore.loading" class="restore-loading">
-                    <span x-text="$store.backupStore.loadingMessage || 'Processing...'"></span>
+                <div x-show="$store.backupStore.loading" class="flex items-center justify-center p-4">
+                    <div class="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
+                    <span class="ml-2 text-gray-600 dark:text-gray-400" x-text="$store.backupStore.loadingMessage || 'Processing...'"></span>
                 </div>
 
                 <!-- Error display -->
-                <div x-show="$store.backupStore.error" class="restore-error">
-                    <span x-text="$store.backupStore.error"></span>
+                <div x-show="$store.backupStore.error" class="p-4 mb-4 text-sm text-red-800 rounded-lg bg-red-50 dark:bg-gray-800 dark:text-red-400" role="alert">
+                    <span class="font-medium">Error:</span> <span x-text="$store.backupStore.error"></span>
                 </div>
 
                 <!-- Success display -->
-                <div x-show="$store.backupStore.restoreResult" class="restore-result">
-                    <h4>Restore Complete</h4>
-                    <div class="result-stats">
-                        <div x-show="$store.backupStore.restoreResult?.deleted_files?.length > 0">Deleted: <span x-text="$store.backupStore.restoreResult?.deleted_files?.length || 0"></span></div>
-                        <div>Restored: <span x-text="$store.backupStore.restoreResult?.restored_files?.length || 0"></span></div>
-                        <div>Skipped: <span x-text="$store.backupStore.restoreResult?.skipped_files?.length || 0"></span></div>
-                        <div>Errors: <span x-text="$store.backupStore.restoreResult?.errors?.length || 0"></span></div>
+                <div x-show="$store.backupStore.restoreResult" class="p-4 mb-4 bg-green-50 border border-green-200 rounded-lg dark:bg-green-900/20 dark:border-green-800">
+                    <h4 class="text-lg font-medium text-green-800 dark:text-green-200 mb-2">Restore Complete</h4>
+                    <div class="flex space-x-4 text-sm text-green-700 dark:text-green-300">
+                        <div x-show="$store.backupStore.restoreResult?.deleted_files?.length > 0">Deleted: <span class="font-bold" x-text="$store.backupStore.restoreResult?.deleted_files?.length || 0"></span></div>
+                        <div>Restored: <span class="font-bold" x-text="$store.backupStore.restoreResult?.restored_files?.length || 0"></span></div>
+                        <div>Skipped: <span class="font-bold" x-text="$store.backupStore.restoreResult?.skipped_files?.length || 0"></span></div>
+                        <div>Errors: <span class="font-bold" x-text="$store.backupStore.restoreResult?.errors?.length || 0"></span></div>
                     </div>
                 </div>
 
-                <!-- Header with buttons (following MCP servers pattern) -->
-                <h3 x-show="$store.backupStore.backupMetadata">Restore Configuration JSON
-                    <button class="btn slim" style="margin-left: 0.5em;"
-                        @click="$store.backupStore.formatJson()">Format</button>
-                    <button class="btn slim" style="margin-left: 0.5em;"
-                        @click="$store.backupStore.resetToOriginalMetadata()">Reset</button>
-                    <button class="btn slim" style="margin-left: 0.5em;"
-                        @click="$store.backupStore.dryRun()" :disabled="$store.backupStore.loading">Dry Run</button>
-                    <button class="btn slim primary" style="margin-left: 0.5em;"
-                        @click="$store.backupStore.performRestore()" :disabled="$store.backupStore.loading">Restore Files</button>
-                </h3>
+                <!-- Header with buttons -->
+                <div x-show="$store.backupStore.backupMetadata" class="flex items-center justify-between mt-4">
+                    <h3 class="text-lg font-medium text-gray-900 dark:text-white">Restore Configuration JSON</h3>
+                    <div class="flex space-x-2">
+                        <button class="px-3 py-2 text-sm font-medium text-gray-900 bg-white border border-gray-300 rounded-lg hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-4 focus:ring-gray-200 dark:focus:ring-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700 transition-colors focus:outline-none"
+                            @click="$store.backupStore.formatJson()">Format</button>
+                        <button class="px-3 py-2 text-sm font-medium text-gray-900 bg-white border border-gray-300 rounded-lg hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-4 focus:ring-gray-200 dark:focus:ring-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700 transition-colors focus:outline-none"
+                            @click="$store.backupStore.resetToOriginalMetadata()">Reset</button>
+                        <button class="px-3 py-2 text-sm font-medium text-gray-900 bg-white border border-gray-300 rounded-lg hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-4 focus:ring-gray-200 dark:focus:ring-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700 transition-colors focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed"
+                            @click="$store.backupStore.dryRun()" :disabled="$store.backupStore.loading">Dry Run</button>
+                        <button class="px-3 py-2 text-sm font-medium text-white bg-blue-700 rounded-lg hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800 transition-colors focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed"
+                            @click="$store.backupStore.performRestore()" :disabled="$store.backupStore.loading">Restore Files</button>
+                    </div>
+                </div>
 
                 <!-- JSON Editor (upper part) -->
-                <div x-show="$store.backupStore.backupMetadata" id="restore-metadata-editor"></div>
+                <div x-show="$store.backupStore.backupMetadata" id="restore-metadata-editor" class="w-full h-64 border rounded-lg border-gray-200 dark:border-gray-700 overflow-hidden"></div>
 
                 <!-- File Operations Display (lower part) -->
-                <h3 x-show="$store.backupStore.backupMetadata" id="restore-operations">File Operations</h3>
+                <h3 x-show="$store.backupStore.backupMetadata" class="text-lg font-medium text-gray-900 dark:text-white mt-4">File Operations</h3>
 
                 <!-- File listing textarea -->
-                <div x-show="$store.backupStore.backupMetadata" class="file-operations-container">
+                <div x-show="$store.backupStore.backupMetadata" class="flex-1 min-h-0">
                     <textarea id="restore-file-list"
                               x-model="$store.backupStore.fileOperationsLog"
                               readonly
-                              placeholder="File operations will be displayed here..."></textarea>
+                              placeholder="File operations will be displayed here..."
+                              class="w-full h-48 p-2.5 text-sm font-mono text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500 resize-none"></textarea>
                 </div>
 
             </div>
         </template>
     </div>
-
-    <style>
-        .upload-section {
-            margin-bottom: 1.5rem;
-            padding: 1rem;
-            border: 2px dashed var(--color-border);
-            border-radius: 4px;
-            text-align: center;
-        }
-
-        .upload-label {
-            display: block;
-            margin-bottom: 0.5rem;
-            font-weight: 600;
-        }
-
-        .restore-loading {
-            width: 100%;
-            text-align: center;
-            margin-top: 2rem;
-            margin-bottom: 2rem;
-            color: var(--color-secondary);
-        }
-
-        #restore-metadata-editor {
-            width: 100%;
-            height: 25em;
-        }
-
-        .file-operations-container {
-            margin-top: 0.5em;
-            margin-bottom: 1em;
-        }
-
-        #restore-file-list {
-            width: 100%;
-            height: 15em;
-            font-family: monospace;
-            font-size: 0.85em;
-            background: var(--color-input);
-            color: var(--color-text);
-            border: 1px solid var(--color-border);
-            border-radius: 4px;
-            padding: 0.5em;
-            resize: vertical;
-        }
-
-        .overwrite-policy {
-            margin: 1rem 0;
-        }
-
-        .policy-label {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            margin: 0.5rem 0;
-        }
-
-        .clean-before-restore {
-            margin: 1rem 0;
-            padding: 0.75rem;
-            background: var(--color-input);
-            border: 1px solid var(--color-border);
-            border-radius: 4px;
-        }
-
-        .checkbox-label {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            margin-bottom: 0.5rem;
-            cursor: pointer;
-        }
-
-        .checkbox-label input[type="checkbox"] {
-            width: 1rem;
-            height: 1rem;
-        }
-
-        .checkbox-text {
-            font-weight: 600;
-            color: var(--color-text);
-        }
-
-        .clean-description {
-            font-size: 0.85rem;
-            color: var(--color-secondary);
-            line-height: 1.4;
-            margin-left: 1.5rem;
-        }
-
-        .policy-label-text {
-            font-weight: 600;
-            white-space: nowrap;
-        }
-
-        .policy-dropdown {
-            flex: 1;
-            padding: 0.5rem;
-            border: 1px solid var(--color-border);
-            border-radius: 4px;
-            background: var(--color-input);
-            color: var(--color-text);
-            font-size: 0.9rem;
-        }
-
-        .restore-error {
-            color: var(--color-error);
-            margin: 0.5rem 0;
-            padding: 0.5rem;
-            background: var(--color-input);
-            border: 1px solid var(--color-error);
-            border-radius: 4px;
-        }
-
-        .restore-result {
-            margin: 1rem 0;
-            padding: 1rem;
-            background: var(--color-secondary);
-            border-radius: 4px;
-        }
-
-        .result-stats {
-            display: flex;
-            gap: 1rem;
-            margin-top: 0.5rem;
-        }
-
-        .restore-warning {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: 1rem 0;
-            padding: 1rem;
-            background: var(--color-background);
-            border: 2px solid #f1c40f;
-            border-radius: 4px;
-            color: var(--color-text);
-        }
-
-        .warning-icon {
-            font-size: 1.2em;
-            margin: 0 1rem;
-            color: #f39c12;
-        }
-
-        .warning-text {
-            text-align: center;
-            font-weight: 500;
-            flex: 1;
-        }
-    </style>
 </body>
 </html>

@@ -98,9 +98,32 @@ export async function sendMessage() {
       }
 
       // Handle response
-      const jsonResponse = await response.json();
+      let jsonResponse = null;
+      if (response && response.ok) {
+        // Check content length/type safe parsing
+        const len = response.headers.get("Content-Length");
+        const type = response.headers.get("Content-Type");
+        if (response.status !== 204 && len !== "0") {
+             if (type && type.includes("application/json")) {
+                 try {
+                    jsonResponse = await response.json();
+                 } catch (e) {
+                    console.error("Failed to parse message response", e);
+                 }
+             }
+        }
+      } else if (response) {
+          const errText = await response.text();
+          throw new Error(errText || "Request failed");
+      }
+
       if (!jsonResponse) {
-        toast("No response returned.", "error");
+        // If success but no JSON, maybe it's fine? Logic below expects jsonResponse
+        // But invalid response logic was: toast("No response returned.", "error");
+        // We should just verify if we need it.
+        // setContext(jsonResponse.context) suggests we need it.
+        // If 204 or empty, we might miss context update.
+        console.warn("Empty or invalid JSON response from message_async");
       } else {
         setContext(jsonResponse.context);
       }

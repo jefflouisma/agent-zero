@@ -5,24 +5,33 @@
     </script>
 </head>
 <body>
-    <div id="progress-bar-box">
-        <h4 id="progress-bar-h">
-            <span id="progress-bar-i">|></span><span id="progress-bar"></span>
+    <div id="progress-bar-box" class="flex justify-between px-4 pt-2 pb-0 bg-gray-50 dark:bg-gray-900 z-[1001]">
+        <h4 id="progress-bar-h" class="flex items-center justify-start h-5 mr-5 overflow-hidden text-sm font-normal text-blue-600 truncate whitespace-nowrap dark:text-blue-400">
+            <span id="progress-bar-i" class="pr-2 font-bold text-gray-500 dark:text-gray-400 opacity-50">|></span>
+            <span id="progress-bar" class="shiny-text"></span>
         </h4>
-        <h4 id="progress-bar-stop-speech" x-data x-cloak x-show="$store.speech.isSpeaking">
-            <span id="stop-speech" @click="$store.speech.stop()" style="cursor: pointer">Stop Speech</span>
+        <h4 id="progress-bar-stop-speech" x-data x-cloak x-show="$store.speech.isSpeaking" class="mr-5">
+            <span id="stop-speech" @click="$store.speech.stop()" class="text-sm text-red-500 cursor-pointer hover:text-red-700">Stop Speech</span>
         </h4>
     </div>
 
-
     <style>
-    #progress-bar-box { background-color: var(--color-panel); padding: var(--spacing-sm) var(--spacing-md); padding-bottom: 0; display: flex; justify-content: space-between; z-index: 1001; }
-    #progress-bar-box h4 { margin: 0 1.2em 0 0; }
-    #progress-bar-h { color: var(--color-primary); display: flex; align-items: left; justify-content: flex-start; height: 1.2em; text-overflow: ellipsis; white-space: nowrap; overflow: hidden; font-weight: normal; }
-    #progress-bar-i { font-weight: bold; padding-right: 0.5em; color: var(--color-secondary); }
-    .shiny-text { background: linear-gradient(to right, var(--color-primary-dark) 20%, var(--color-text) 40%, var(--color-text) 60%, var(--color-primary-dark) 60%); background-size: 200% auto; color: transparent; -webkit-background-clip: text; background-clip: text; animation: shine 1s linear infinite; }
+    .shiny-text { 
+        background: linear-gradient(to right, #1d4ed8 20%, #111827 40%, #111827 60%, #1d4ed8 80%); 
+        background-size: 200% auto; 
+        color: transparent; 
+        -webkit-background-clip: text; 
+        background-clip: text; 
+        animation: shine 1s linear infinite; 
+    }
+    .dark .shiny-text {
+        background: linear-gradient(to right, #60a5fa 20%, #f3f4f6 40%, #f3f4f6 60%, #60a5fa 80%);
+        background-size: 200% auto;
+        color: transparent;
+        -webkit-background-clip: text;
+        background-clip: text;
+    }
     @keyframes shine { to { background-position: -200% center; } }
-    .light-mode #progress-bar-i { color: var(--color-border-dark); opacity: 0.5; }
     </style>
 </body>
 </html>

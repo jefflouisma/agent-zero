@@ -4,6 +4,7 @@
  */
 
 import { formatDateTime, getUserTimezone } from './time-utils.js';
+import { callJsonApi } from "/js/api.js";
 import { store as chatsStore } from "/components/sidebar/chats/chats-store.js"
 import { store as  notificationsStore } from "/components/notifications/notification-store.js"
 import { store as projectsStore } from "/components/projects/projects-store.js"
@@ -145,7 +146,7 @@ const fullComponentImplementation = function() {
             // Set up event handler for tab selection to ensure view is refreshed when tab becomes visible
             document.addEventListener('click', (event) => {
                 // Check if a tab was clicked
-                const clickedTab = event.target.closest('.settings-tab');
+                const clickedTab = event.target.closest('[data-tab]');
                 if (clickedTab && clickedTab.getAttribute('data-tab') === 'scheduler') {
                     setTimeout(() => {
                         this.fetchTasks();
@@ -271,21 +272,9 @@ const fullComponentImplementation = function() {
 
             this.isLoading = true;
             try {
-                const response = await fetchApi('/scheduler_tasks_list', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        timezone: getUserTimezone()
-                    })
+                const data = await callJsonApi('/scheduler_tasks_list', {
+                    timezone: getUserTimezone()
                 });
-
-                if (!response.ok) {
-                    throw new Error('Failed to fetch tasks');
-                }
-
-                const data = await response.json();
 
                 // Check if data.tasks exists and is an array
                 if (!data || !data.tasks) {
@@ -438,12 +427,13 @@ const fullComponentImplementation = function() {
 
         // Get CSS class for state badge
         getStateBadgeClass(state) {
+            const baseClasses = "px-2.5 py-0.5 rounded text-xs font-medium border";
             switch (state) {
-                case 'idle': return 'scheduler-status-idle';
-                case 'running': return 'scheduler-status-running';
-                case 'disabled': return 'scheduler-status-disabled';
-                case 'error': return 'scheduler-status-error';
-                default: return '';
+                case 'idle': return `${baseClasses} bg-blue-100 text-blue-800 border-blue-400 dark:bg-blue-900 dark:text-blue-300 dark:border-blue-600`;
+                case 'running': return `${baseClasses} bg-yellow-100 text-yellow-800 border-yellow-400 dark:bg-yellow-900 dark:text-yellow-300 dark:border-yellow-600`;
+                case 'disabled': return `${baseClasses} bg-gray-100 text-gray-800 border-gray-400 dark:bg-gray-700 dark:text-gray-300 dark:border-gray-500`;
+                case 'error': return `${baseClasses} bg-red-100 text-red-800 border-red-400 dark:bg-red-900 dark:text-red-300 dark:border-red-600`;
+                default: return `${baseClasses} bg-gray-100 text-gray-800 border-gray-200 dark:bg-gray-700 dark:text-gray-300 dark:border-gray-600`;
             }
         },
 
@@ -920,21 +910,7 @@ const fullComponentImplementation = function() {
                 console.log('Final task data being sent to API:', JSON.stringify(taskData, null, 2));
 
                 // Make API request
-                const response = await fetchApi(apiEndpoint, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify(taskData)
-                });
-
-                if (!response.ok) {
-                    const errorData = await response.json();
-                    throw new Error(errorData.error || 'Failed to save task');
-                }
-
-                // Parse response data to get the created/updated task
-                const responseData = await response.json();
+                const responseData = await callJsonApi(apiEndpoint, taskData);
 
                 // Show success message
                 showToast(this.isCreating ? 'Task created successfully' : 'Task updated successfully', 'success');
@@ -1012,22 +988,10 @@ const fullComponentImplementation = function() {
         // Run a task
         async runTask(taskId) {
             try {
-                const response = await fetchApi('/scheduler_task_run', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        task_id: taskId,
-                        timezone: getUserTimezone()
-                    })
+                const data = await callJsonApi('/scheduler_task_run', {
+                    task_id: taskId,
+                    timezone: getUserTimezone()
                 });
-
-                const data = await response.json();
-
-                if (!response.ok) {
-                    throw new Error(data?.error || 'Failed to run task');
-                }
 
                 const toastMessage = data.warning || data.message || 'Task started successfully';
                 const toastType = data.warning ? 'warning' : 'success';
@@ -1059,22 +1023,11 @@ const fullComponentImplementation = function() {
                 this.showLoadingState = true;
 
                 // Call API to update the task state
-                const response = await fetchApi('/scheduler_task_update', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        task_id: taskId,
-                        state: 'idle',  // Always reset to idle state
-                        timezone: getUserTimezone()
-                    })
+                await callJsonApi('/scheduler_task_update', {
+                    task_id: taskId,
+                    state: 'idle',  // Always reset to idle state
+                    timezone: getUserTimezone()
                 });
-
-                if (!response.ok) {
-                    const errorData = await response.json();
-                    throw new Error(errorData.error || 'Failed to reset task state');
-                }
 
                 showToast('Task state reset to idle', 'success');
 
@@ -1100,21 +1053,10 @@ const fullComponentImplementation = function() {
                 // if we delete selected context, switch to another first
                 await chatsStore.switchFromContext(taskId);
 
-                const response = await fetchApi('/scheduler_task_delete', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        task_id: taskId,
-                        timezone: getUserTimezone()
-                    })
+                await callJsonApi('/scheduler_task_delete', {
+                    task_id: taskId,
+                    timezone: getUserTimezone()
                 });
-
-                if (!response.ok) {
-                    const errorData = await response.json();
-                    throw new Error(errorData.error || 'Failed to delete task');
-                }
 
                 showToast('Task deleted successfully', 'success');
 

@@ -6,89 +6,49 @@
     </script>
 </head>
 <body>
-    <div x-data>
+    <div x-data class="flex flex-col h-full">
         <template x-if="$store.backupStore">
-            <div x-init="$store.backupStore.initBackup()" x-destroy="$store.backupStore.onClose()">
+            <div x-init="$store.backupStore.initBackup()" x-destroy="$store.backupStore.onClose()" class="flex flex-col h-full space-y-4">
 
-                <!-- Header with buttons (following MCP servers pattern) -->
-                <h3>Backup Configuration JSON
-                    <button class="btn slim" style="margin-left: 0.5em;"
-                        @click="$store.backupStore.formatJson()">Format</button>
-                    <button class="btn slim" style="margin-left: 0.5em;"
-                        @click="$store.backupStore.resetToDefaults()">Reset</button>
-                    <button class="btn slim" style="margin-left: 0.5em;"
-                        @click="$store.backupStore.dryRun()" :disabled="$store.backupStore.loading">Dry Run</button>
-                    <button class="btn slim primary" style="margin-left: 0.5em;"
-                        @click="$store.backupStore.createBackup()" :disabled="$store.backupStore.loading">Create Backup</button>
-                </h3>
+                <!-- Header with buttons -->
+                <div class="flex items-center justify-between">
+                    <h3 class="text-lg font-medium text-gray-900 dark:text-white">Backup Configuration JSON</h3>
+                    <div class="flex space-x-2">
+                        <button class="px-3 py-2 text-sm font-medium text-gray-900 bg-white border border-gray-300 rounded-lg hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-4 focus:ring-gray-200 dark:focus:ring-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700 transition-colors focus:outline-none" @click="$store.backupStore.formatJson()">Format</button>
+                        <button class="px-3 py-2 text-sm font-medium text-gray-900 bg-white border border-gray-300 rounded-lg hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-4 focus:ring-gray-200 dark:focus:ring-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700 transition-colors focus:outline-none" @click="$store.backupStore.resetToDefaults()">Reset</button>
+                        <button class="px-3 py-2 text-sm font-medium text-gray-900 bg-white border border-gray-300 rounded-lg hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-4 focus:ring-gray-200 dark:focus:ring-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700 transition-colors focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed" @click="$store.backupStore.dryRun()" :disabled="$store.backupStore.loading">Dry Run</button>
+                        <button class="px-3 py-2 text-sm font-medium text-white bg-blue-700 rounded-lg hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800 transition-colors focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed" @click="$store.backupStore.createBackup()" :disabled="$store.backupStore.loading">Create Backup</button>
+                    </div>
+                </div>
 
                 <!-- JSON Editor (upper part) -->
-                <div id="backup-metadata-editor"></div>
+                <div id="backup-metadata-editor" class="w-full h-64 border rounded-lg border-gray-200 dark:border-gray-700 overflow-hidden"></div>
 
                 <!-- File Operations Display (lower part) -->
-                <h3 id="backup-operations">File Operations</h3>
+                <h3 class="text-lg font-medium text-gray-900 dark:text-white mt-4">File Operations</h3>
 
                 <!-- File listing textarea -->
-                <div class="file-operations-container">
+                <div class="flex-1 min-h-0">
                     <textarea id="backup-file-list"
                               x-model="$store.backupStore.fileOperationsLog"
                               readonly
-                              placeholder="File operations will be displayed here..."></textarea>
+                              placeholder="File operations will be displayed here..."
+                              class="w-full h-48 p-2.5 text-sm font-mono text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500 resize-none"></textarea>
                 </div>
 
                 <!-- Loading indicator -->
-                <div x-show="$store.backupStore.loading" class="backup-loading">
-                    <span x-text="$store.backupStore.loadingMessage || 'Processing...'"></span>
+                <div x-show="$store.backupStore.loading" class="flex items-center justify-center p-4">
+                    <div class="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
+                    <span class="ml-2 text-gray-600 dark:text-gray-400" x-text="$store.backupStore.loadingMessage || 'Processing...'"></span>
                 </div>
 
                 <!-- Error display -->
-                <div x-show="$store.backupStore.error" class="backup-error">
-                    <span x-text="$store.backupStore.error"></span>
+                <div x-show="$store.backupStore.error" class="p-4 mb-4 text-sm text-red-800 rounded-lg bg-red-50 dark:bg-gray-800 dark:text-red-400" role="alert">
+                    <span class="font-medium">Error:</span> <span x-text="$store.backupStore.error"></span>
                 </div>
 
             </div>
         </template>
     </div>
-
-    <style>
-        .backup-loading {
-            width: 100%;
-            text-align: center;
-            margin-top: 2rem;
-            margin-bottom: 2rem;
-            color: var(--color-text-secondary);
-        }
-
-        #backup-metadata-editor {
-            width: 100%;
-            height: 25em;
-        }
-
-        .file-operations-container {
-            margin-top: 0.5em;
-            margin-bottom: 1em;
-        }
-
-        #backup-file-list {
-            width: 100%;
-            height: 15em;
-            font-family: monospace;
-            font-size: 0.85em;
-            background: var(--color-bg-primary);
-            color: var(--color-text-primary);
-            border: 1px solid var(--color-border);
-            border-radius: 4px;
-            padding: 0.5em;
-            resize: vertical;
-        }
-
-        .backup-error {
-            color: var(--color-error);
-            margin: 0.5rem 0;
-            padding: 0.5rem;
-            background: var(--color-error-bg);
-            border-radius: 4px;
-        }
-    </style>
 </body>
 </html>

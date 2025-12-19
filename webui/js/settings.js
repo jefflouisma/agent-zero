@@ -33,9 +33,9 @@ const settingsModalProxy = {
 
         // Auto-scroll active tab into view after a short delay to ensure DOM updates
         setTimeout(() => {
-            const activeTab = document.querySelector('.settings-tab.active');
-            if (activeTab) {
-                activeTab.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+            const activeTabElement = document.querySelector(`[data-tab="${tabName}"]`);
+            if (activeTabElement) {
+                activeTabElement.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
             }
 
             // When switching to the scheduler tab, initialize Flatpickr components
@@ -128,15 +128,12 @@ const settingsModalProxy = {
 
                 // Add a small delay *after* setting the tab to ensure scrolling works
                 setTimeout(() => {
-                    const activeTabElement = document.querySelector('.settings-tab.active');
+                    const activeTabElement = document.querySelector(`[data-tab="${modalAD.activeTab}"]`);
                     if (activeTabElement) {
                         activeTabElement.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
                     }
                     // Debug log
-                    const schedulerTab = document.querySelector('.settings-tab[title="Task Scheduler"]');
                     console.log(`Current active tab after direct set: ${modalAD.activeTab}`);
-                    console.log('Scheduler tab active after direct initialization?',
-                        schedulerTab && schedulerTab.classList.contains('active'));
 
                     // Explicitly start polling if we're on the scheduler tab
                     if (modalAD.activeTab === 'scheduler') {
@@ -355,22 +352,12 @@ document.addEventListener('alpine:init', function () {
             async fetchSettings() {
                 try {
                     this.isLoading = true;
-                    const response = await fetchApi('/api/settings_get', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        }
-                    });
+                    const data = await sendJsonData('/api/settings_get');
 
-                    if (response.ok) {
-                        const data = await response.json();
-                        if (data && data.settings) {
-                            this.settingsData = data.settings;
-                        } else {
-                            console.error('Invalid settings data format');
-                        }
+                    if (data && data.settings) {
+                        this.settingsData = data.settings;
                     } else {
-                        console.error('Failed to fetch settings:', response.statusText);
+                        console.error('Invalid settings data format');
                     }
                 } catch (error) {
                     console.error('Error fetching settings:', error);
@@ -428,22 +415,11 @@ document.addEventListener('alpine:init', function () {
                     }
 
                     // Send request
-                    const response = await fetchApi('/api/settings_save', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify(formData)
-                    });
+                    await sendJsonData('/api/settings_save', formData);
 
-                    if (response.ok) {
-                        showToast('Settings saved successfully', 'success');
-                        // Refresh settings
-                        await this.fetchSettings();
-                    } else {
-                        const errorData = await response.json();
-                        throw new Error(errorData.error || 'Failed to save settings');
-                    }
+                    showToast('Settings saved successfully', 'success');
+                    // Refresh settings
+                    await this.fetchSettings();
                 } catch (error) {
                     console.error('Error saving settings:', error);
                     showToast('Failed to save settings: ' + error.message, 'error');
@@ -485,20 +461,12 @@ document.addEventListener('alpine:init', function () {
                     }
 
                     // Send test request
-                    const response = await fetchApi('/api/test_connection', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify({
-                            service: field.service,
-                            api_key: apiKey
-                        })
+                    const data = await sendJsonData('/api/test_connection', {
+                        service: field.service,
+                        api_key: apiKey
                     });
 
-                    const data = await response.json();
-
-                    if (response.ok && data.success) {
+                    if (data.success) {
                         field.testResult = 'Connection successful!';
                         field.testStatus = 'success';
                     } else {

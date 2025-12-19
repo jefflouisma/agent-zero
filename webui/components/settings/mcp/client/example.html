@@ -1,24 +1,23 @@
 <html>
-
 <head>
     <title>Configuring MCP Servers</title>
-
 </head>
-
 <body>
-    <div x-data>
-        <p>Agent Zero uses standard JSON configuration known from other AI applications.<br>
-            The configuration is a JSON object containing "mcpServers" object where each key is an individual MCP
-            server.<br>
-            Local servers are defined by a "command", "args", "env" variables.<br>
-            Remote servers are defined by a "url", "headers".<br>
-            "disabled" can be set to true to disable a server without removing config.<br>
-            Custom "description" can be set to provide additional information about the server to A0.<br>
-            All servers can also define "init_timeout" and "tool_timeout" which override global settings.</p>
+    <div x-data class="flex flex-col h-full p-4 space-y-4">
+        <div class="text-sm text-gray-600 dark:text-gray-400 space-y-1">
+            <p>Agent Zero uses standard JSON configuration known from other AI applications.</p>
+            <p>The configuration is a JSON object containing "mcpServers" object where each key is an individual MCP server.</p>
+            <ul class="list-disc list-inside ml-2">
+                <li>Local servers are defined by a "command", "args", "env" variables.</li>
+                <li>Remote servers are defined by a "url", "headers".</li>
+                <li>"disabled" can be set to true to disable a server without removing config.</li>
+                <li>Custom "description" can be set to provide additional information about the server to A0.</li>
+                <li>All servers can also define "init_timeout" and "tool_timeout" which override global settings.</li>
+            </ul>
+        </div>
 
-
-        <h3>Example MCP Servers Configuration JSON</h3>
-        <div id="mcp-servers-example"></div>
+        <h3 class="text-lg font-medium text-gray-900 dark:text-white">Example MCP Servers Configuration JSON</h3>
+        <div id="mcp-servers-example" class="w-full h-[40rem] border rounded-lg border-gray-200 dark:border-gray-700"></div>
 
         <script>
             setTimeout(() => {
@@ -66,16 +65,6 @@
                 editor.setReadOnly(true);
             }, 0);
         </script>
-        <!-- </template> -->
     </div>
-
-    <style>
-        #mcp-servers-example {
-            width: 100%;
-            height: 40em;
-        }
-    </style>
-
 </body>
-
 </html>

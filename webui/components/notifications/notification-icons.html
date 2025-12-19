@@ -8,20 +8,19 @@
     <div x-data>
         <template x-if="$store.notificationStore">
             <!-- Notification Toggle Button -->
-            <div class="notification-toggle"
+            <button class="relative inline-flex items-center justify-center p-2 text-sm font-medium text-center text-gray-500 rounded-lg hover:text-gray-900 focus:outline-none dark:text-gray-400 dark:hover:text-white bg-white border border-gray-200 hover:bg-gray-100 dark:bg-gray-800 dark:border-gray-600 dark:hover:bg-gray-700 transition-colors h-[34px] w-[34px]"
                  :class="{
-                     'has-unread': $store.notificationStore.unreadPrioCount > 0,
-                     'has-notifications': $store.notificationStore.notifications.length > 0
+                     'text-blue-600 border-blue-600 bg-blue-50 dark:text-blue-500 dark:border-blue-500 dark:bg-blue-900/20': $store.notificationStore.unreadPrioCount > 0
                  }"
                  @click="$store.notificationStore.openModal()"
                  title="View Notifications">
-                <div class="notification-icon">
-                    <span class="material-symbols-outlined">notifications</span>
-                </div>
+                
+                <span class="material-symbols-outlined text-[20px]">notifications</span>
+                
                 <span x-show="$store.notificationStore.unreadPrioCount > 0"
-                      class="notification-badge"
+                      class="absolute inline-flex items-center justify-center w-5 h-5 text-xs font-bold text-white bg-red-500 border-2 border-white rounded-full -top-2 -right-2 dark:border-gray-900"
                       x-text="$store.notificationStore.unreadPrioCount"></span>
-            </div>
+            </button>
         </template>
     </div>
 </body>

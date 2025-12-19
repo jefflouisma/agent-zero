@@ -706,7 +706,13 @@ const model = {
         body: formData
       });
 
-      const result = await response.json();
+      let result;
+      try {
+        const text = await response.text();
+        result = text ? JSON.parse(text) : { success: false, error: "Empty response" };
+      } catch (e) {
+        result = { success: false, error: "Invalid JSON response" };
+      }
 
       if (result.success) {
         // Log deleted files if clean before restore was enabled

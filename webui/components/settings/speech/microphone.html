@@ -1,47 +1,38 @@
 <html>
-
 <head>
-    <title>Microhone settings</title>
-
+    <title>Microphone settings</title>
     <!-- Import the alpine store -->
     <script type="module">
         import { store } from "/components/settings/speech/microphone-setting-store.js";
         console.log("microphone-setting-store.js loaded");
     </script>
 </head>
-
 <body>
-
     <!-- This construct of x-data + x-if is used to ensure the component is only rendered when the store is available -->
-    <div x-data>
+    <div x-data class="p-4">
         <template x-if="$store.microphoneSetting">
-
-            <div>
+            <div class="flex flex-col gap-3">
                 <select x-model="$store.microphoneSetting.selectedDevice"
                     @change="$store.microphoneSetting.onSelectDevice()"
-                    x-show="$store.microphoneSetting.devices.length > 0">
+                    x-show="$store.microphoneSetting.devices.length > 0"
+                    class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
                     <template x-for="option in $store.microphoneSetting.devices" :key="option.deviceId">
                         <option :value="option.deviceId" x-text="option.label"
                             :selected="option.deviceId === $store.microphoneSetting.selectedDevice"></option>
                     </template>
                 </select>
-                <button class="btn btn-field" 
+                
+                <button class="px-4 py-2 text-sm font-medium text-gray-900 bg-white border border-gray-200 rounded-lg hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-2 focus:ring-blue-700 focus:text-blue-700 dark:bg-gray-800 dark:border-gray-600 dark:text-white dark:hover:text-white dark:hover:bg-gray-700" 
                     x-show="$store.microphoneSetting.devices.length == 0 && !$store.microphoneSetting.requestingPermission"
                     @click="$store.microphoneSetting.requestPermission()">Request permission to select device</button>
-                <button class="btn btn-field" 
+                
+                <button class="px-4 py-2 text-sm font-medium text-gray-900 bg-gray-100 border border-gray-200 rounded-lg cursor-wait dark:bg-gray-700 dark:border-gray-600 dark:text-gray-400" 
                     x-show="$store.microphoneSetting.requestingPermission"
                     @click="$store.microphoneSetting.requestPermission()">
                     <span>Waiting for devices... [retry]</span>
                 </button>
             </div>
-
         </template>
     </div>
-
-    <!-- Optional style for the component -->
-    <style>
-    </style>
-
 </body>
-
 </html>

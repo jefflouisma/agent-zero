@@ -1,5 +1,6 @@
 import { createStore } from "/js/AlpineStore.js";
 import { updateChatInput, sendMessage } from "/index.js";
+import { fetchApi, callJsonApi } from "/js/api.js";
 import { sleep } from "/js/sleep.js";
 import { store as microphoneSettingStore } from "/components/settings/speech/microphone-setting-store.js";
 import * as shortcuts from "/js/shortcuts.js";
@@ -49,20 +50,29 @@ const model = {
     return this.microphoneInput?.status || Status.INACTIVE;
   },
 
-  updateMicrophoneButtonUI() {
-    const microphoneButton = document.getElementById("microphone-button");
-    if (!microphoneButton) return;
+  get micButtonClasses() {
     const status = this.micStatus;
-    microphoneButton.classList.remove(
-      "mic-inactive",
-      "mic-activating",
-      "mic-listening",
-      "mic-recording",
-      "mic-waiting",
-      "mic-processing"
-    );
-    microphoneButton.classList.add(`mic-${status.toLowerCase()}`);
-    microphoneButton.setAttribute("data-status", status);
+    const base = "flex items-center justify-center w-10 h-10 rounded-full transition-colors shadow-sm focus:outline-none focus:ring-2 focus:ring-gray-200 dark:focus:ring-offset-gray-900";
+    
+    switch (status) {
+      case Status.ACTIVATING:
+        return `${base} bg-gray-300 text-gray-700 border border-gray-400 animate-pulse dark:bg-gray-600 dark:text-gray-200 dark:border-gray-500`;
+      case Status.LISTENING:
+        return `${base} bg-red-500 text-white border border-red-600 hover:bg-red-600 dark:bg-red-600 dark:border-red-700 dark:hover:bg-red-700`;
+      case Status.RECORDING:
+        return `${base} bg-green-500 text-white border border-green-600 hover:bg-green-600 dark:bg-green-600 dark:border-green-700 dark:hover:bg-green-700`;
+      case Status.WAITING:
+        return `${base} bg-teal-500 text-white border border-teal-600 dark:bg-teal-600 dark:border-teal-700`;
+      case Status.PROCESSING:
+        return `${base} bg-cyan-600 text-white border border-cyan-700 animate-pulse dark:bg-cyan-700 dark:border-cyan-800`;
+      case Status.INACTIVE:
+      default:
+        return `${base} text-gray-700 bg-white border border-gray-300 hover:bg-gray-50 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600 dark:hover:bg-gray-700`;
+    }
+  },
+
+  updateMicrophoneButtonUI() {
+    // Deprecated: UI updates are now handled by Alpine binding to micButtonClasses
   },
 
   async handleMicrophoneClick() {
@@ -110,8 +120,7 @@ const model = {
   // Load settings from server
   async loadSettings() {
     try {
-      const response = await fetchApi("/settings_get", { method: "POST" });
-      const data = await response.json();
+      const data = await callJsonApi("/settings_get");
       const speechSection = data.settings.sections.find(
         (s) => s.title === "Speech"
       );

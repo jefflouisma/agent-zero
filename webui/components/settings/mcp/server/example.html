@@ -1,31 +1,43 @@
 <html>
-
 <head>
     <title>Connection to A0 MCP Server</title>
-
 </head>
-
 <body>
-    <div x-data>
-        <p>Agent Zero MCP Server is an SSE MCP running on the same URL and port as the Web UI + /mcp/sse or /mcp/http path.</p>
-        <p>The same applies if you run A0 on a public URL using a tunnel.</p>
+    <div x-data class="flex flex-col h-full p-4 space-y-4">
+        <div class="text-sm text-gray-600 dark:text-gray-400 space-y-2">
+            <p>Agent Zero MCP Server is an SSE MCP running on the same URL and port as the Web UI + /mcp/sse or /mcp/http path.</p>
+            <p>The same applies if you run A0 on a public URL using a tunnel.</p>
+        </div>
 
         <!-- API Token Information -->
-        <div style="background-color: var(--color-bg-secondary); border: 1px solid var(--color-border); border-radius: 6px; padding: 12px; margin: 16px 0;">
-            <h4 style="margin: 0 0 8px 0; color: var(--color-text-primary);">API Token Information</h4>
-            <p style="margin: 0; color: var(--color-text-secondary); font-size: 14px;">
+        <div class="bg-gray-50 border border-gray-200 rounded-lg p-4 my-4 dark:bg-gray-800 dark:border-gray-700">
+            <h4 class="m-0 mb-2 font-medium text-gray-900 dark:text-white">API Token Information</h4>
+            <p class="m-0 text-sm text-gray-600 dark:text-gray-400">
                 The token used in the URL is automatically generated from your username and password.
                 This same token is also used for external API endpoints. The token changes when you update your credentials.
             </p>
         </div>
 
-        <h3>Example MCP Server Configuration JSON</h3>
-        <div id="mcp-server-example"></div>
+        <h3 class="text-lg font-medium text-gray-900 dark:text-white">Example MCP Server Configuration JSON</h3>
+        <div id="mcp-server-example" class="w-full h-60 border rounded-lg border-gray-200 dark:border-gray-700"></div>
 
         <script>
             setTimeout(() => {
                 const url = window.location.origin;
-                const token = settingsModalProxy.settings.sections.filter(x => x.id == "mcp_server")[0].fields.filter(x => x.id == "mcp_server_token")[0].value;
+                // Safe access to settings
+                let token = "TOKEN_NOT_FOUND";
+                try {
+                    if (settingsModalProxy && settingsModalProxy.settings) {
+                        const section = settingsModalProxy.settings.sections.find(x => x.id == "mcp_server");
+                        if (section) {
+                            const field = section.fields.find(x => x.id == "mcp_server_token");
+                            if (field) token = field.value;
+                        }
+                    }
+                } catch (e) {
+                    console.error("Error retrieving token for example:", e);
+                }
+
                 const jsonExample = JSON.stringify({
                     "mcpServers":
                     {
@@ -53,16 +65,6 @@
                 editor.setReadOnly(true);
             }, 0);
         </script>
-        <!-- </template> -->
     </div>
-
-    <style>
-        #mcp-server-example {
-            width: 100%;
-            height: 15em;
-        }
-    </style>
-
 </body>
-
 </html>

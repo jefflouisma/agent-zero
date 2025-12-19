@@ -7,7 +7,7 @@
 <body>
   <div x-data>
     <template x-if="$store.sidebar">
-      <div class="sidebar-top-wrapper">
+      <div class="flex flex-col shrink-0">
         <!-- Header Icons (Toggle + Logo) -->
         <x-component path="sidebar/top-section/header-icons.html"></x-component>
         
@@ -16,16 +16,6 @@
       </div>
     </template>
   </div>
-
-
-  <style>
-    /* Sidebar top wrapper - ensures proper spacing and layout */
-    .sidebar-top-wrapper {
-      display: flex;
-      flex-direction: column;
-      flex-shrink: 0;
-    }
-  </style>
 </body>
 </html>
 

@@ -5,7 +5,10 @@ import { store as _messageResizeStore } from "/components/messages/resize/messag
 import { store as attachmentsStore } from "/components/chat/attachments/attachmentsStore.js";
 import { addActionButtonsToElement } from "/components/messages/action-buttons/simple-action-buttons.js";
 
-const chatHistory = document.getElementById("chat-history");
+// Get chatHistory lazily to ensure DOM is ready
+function getChatHistory() {
+  return document.getElementById("chat-history");
+}
 
 let messageGroup = null;
 
@@ -25,7 +28,8 @@ export function setMessage(id, type, heading, content, temp, kvps = null) {
     const sender = type === "user" ? "user" : "ai";
     messageContainer = document.createElement("div");
     messageContainer.id = `message-${id}`;
-    messageContainer.classList.add("message-container", `${sender}-container`);
+    // Tailwind classes for message container
+    messageContainer.className = `flex w-full mb-4 ${sender === 'user' ? 'justify-end' : 'justify-start'}`;
   }
 
   const handler = getHandler(type);
@@ -34,6 +38,7 @@ export function setMessage(id, type, heading, content, temp, kvps = null) {
   // If this is a new message, handle DOM insertion
   if (!document.getElementById(`message-${id}`)) {
     // message type visual grouping
+    // In Tailwind version, we'll keep it simple for now, but preserving group logic
     const groupTypeMap = {
       user: "right",
       info: "mid",
@@ -63,11 +68,12 @@ export function setMessage(id, type, heading, content, temp, kvps = null) {
     ) {
       messageGroup = document.createElement("div");
       messageGroup.id = `message-group-${id}`;
-      messageGroup.classList.add(`message-group`, `message-group-${groupType}`);
+      // Tailwind classes for message group
+      messageGroup.className = `flex flex-col gap-1 w-full px-4 md:px-0 max-w-4xl mx-auto`;
       messageGroup.setAttribute("data-group-type", groupType);
     }
     messageGroup.appendChild(messageContainer);
-    chatHistory.appendChild(messageGroup);
+    getChatHistory().appendChild(messageGroup);
   }
 
   // Simplified implementation - no setup needed
@@ -100,7 +106,7 @@ export function getHandler(type) {
     case "info":
       return drawMessageInfo;
     case "util":
-      return drawMessageUtil;
+      return drawMessageInfo;
     case "hint":
       return drawMessageInfo;
     default:
@@ -117,35 +123,40 @@ export function _drawMessage(
   followUp,
   mainClass = "",
   kvps = null,
-  messageClasses = [],
-  contentClasses = [],
+  messageClasses = [], // These are legacy classes, we might ignore or map them
+  contentClasses = [], // Legacy content classes
   latex = false,
   markdown = false,
   resizeBtns = true
 ) {
   // Find existing message div or create new one
-  let messageDiv = messageContainer.querySelector(".message");
+  let messageDiv = messageContainer.querySelector(".message-bubble"); // Changed class name to be specific
   if (!messageDiv) {
     messageDiv = document.createElement("div");
-    messageDiv.classList.add("message");
+    // Tailwind classes for message bubble
+    // We'll set base classes here, specific colors come from helper functions
+    messageDiv.className = "message-bubble relative p-4 text-sm rounded-xl shadow-sm max-w-[95%] md:max-w-[85%] group";
     messageContainer.appendChild(messageDiv);
   }
-
-  // Update message classes
-  messageDiv.className = `message ${mainClass} ${messageClasses.join(" ")}`;
+  
+  // Add mainClass to container for CSS targeting (e.g., message-util for preferences toggle)
+  if (mainClass) {
+    messageContainer.classList.add(mainClass);
+  }
 
   // Handle heading
   if (heading) {
     let headingElement = messageDiv.querySelector(".msg-heading");
     if (!headingElement) {
       headingElement = document.createElement("div");
-      headingElement.classList.add("msg-heading");
+      headingElement.className = "msg-heading flex items-center justify-between mb-2 pb-1 border-b border-gray-100 dark:border-gray-700";
       messageDiv.insertBefore(headingElement, messageDiv.firstChild);
     }
 
     let headingH4 = headingElement.querySelector("h4");
     if (!headingH4) {
       headingH4 = document.createElement("h4");
+      headingH4.className = "text-sm font-semibold text-gray-600 dark:text-gray-300 flex items-center gap-2";
       headingElement.appendChild(headingH4);
     }
     headingH4.innerHTML = convertIcons(escapeHTML(heading));
@@ -154,16 +165,15 @@ export function _drawMessage(
       let minMaxBtn = headingElement.querySelector(".msg-min-max-btns");
       if (!minMaxBtn) {
         minMaxBtn = document.createElement("div");
-        minMaxBtn.classList.add("msg-min-max-btns");
+        minMaxBtn.className = "msg-min-max-btns flex gap-1";
         minMaxBtn.innerHTML = `
-          <a href="#" class="msg-min-max-btn" @click.prevent="$store.messageResize.minimizeMessageClass('${mainClass}', $event)"><span class="material-symbols-outlined" x-text="$store.messageResize.getSetting('${mainClass}').minimized ? 'expand_content' : 'minimize'"></span></a>
-          <a href="#" class="msg-min-max-btn" x-show="!$store.messageResize.getSetting('${mainClass}').minimized" @click.prevent="$store.messageResize.maximizeMessageClass('${mainClass}', $event)"><span class="material-symbols-outlined" x-text="$store.messageResize.getSetting('${mainClass}').maximized ? 'expand' : 'expand_all'"></span></a>
+          <a href="#" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors" @click.prevent="$store.messageResize.minimizeMessageClass('${mainClass}', $event)"><span class="material-symbols-outlined text-sm" x-text="$store.messageResize.getSetting('${mainClass}').minimized ? 'expand_content' : 'minimize'"></span></a>
+          <a href="#" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors" x-show="!$store.messageResize.getSetting('${mainClass}').minimized" @click.prevent="$store.messageResize.maximizeMessageClass('${mainClass}', $event)"><span class="material-symbols-outlined text-sm" x-text="$store.messageResize.getSetting('${mainClass}').maximized ? 'expand' : 'expand_all'"></span></a>
         `;
         headingElement.appendChild(minMaxBtn);
       }
     }
   } else {
-    // Remove heading if it exists but heading is null
     const existingHeading = messageDiv.querySelector(".msg-heading");
     if (existingHeading) {
       existingHeading.remove();
@@ -174,7 +184,8 @@ export function _drawMessage(
   let bodyDiv = messageDiv.querySelector(".message-body");
   if (!bodyDiv) {
     bodyDiv = document.createElement("div");
-    bodyDiv.classList.add("message-body");
+    // Tailwind classes for body
+    bodyDiv.className = "message-body overflow-x-auto";
     messageDiv.appendChild(bodyDiv);
   }
 
@@ -192,7 +203,8 @@ export function _drawMessage(
         contentDiv = document.createElement("div");
         bodyDiv.appendChild(contentDiv);
       }
-      contentDiv.className = `msg-content ${contentClasses.join(" ")}`;
+      // Tailwind classes for content (prose-like styling)
+      contentDiv.className = `msg-content text-gray-800 dark:text-gray-200 leading-relaxed space-y-2 break-words break-all ${contentClasses.join(" ")}`;
 
       let spanElement = contentDiv.querySelector("span");
       if (!spanElement) {
@@ -226,13 +238,11 @@ export function _drawMessage(
       let preElement = bodyDiv.querySelector(".msg-content");
       if (!preElement) {
         preElement = document.createElement("pre");
-        preElement.classList.add("msg-content", ...contentClasses);
-        preElement.style.whiteSpace = "pre-wrap";
-        preElement.style.wordBreak = "break-word";
+        // Tailwind classes for pre content
+        preElement.className = `msg-content whitespace-pre-wrap break-words font-mono text-xs bg-gray-50 dark:bg-gray-900/50 p-3 rounded-lg border border-gray-100 dark:border-gray-700 text-gray-800 dark:text-gray-200 ${contentClasses.join(" ")}`;
         bodyDiv.appendChild(preElement);
       } else {
-        // Update classes
-        preElement.className = `msg-content ${contentClasses.join(" ")}`;
+        preElement.className = `msg-content whitespace-pre-wrap break-words font-mono text-xs bg-gray-50 dark:bg-gray-900/50 p-3 rounded-lg border border-gray-100 dark:border-gray-700 text-gray-800 dark:text-gray-200 ${contentClasses.join(" ")}`;
       }
 
       let spanElement = preElement.querySelector("span");
@@ -241,7 +251,7 @@ export function _drawMessage(
         preElement.appendChild(spanElement);
       }
 
-      spanElement.innerHTML = convertHTML(content);
+      spanElement.innerHTML = escapeHTML(content);
 
       // Ensure action buttons exist
       addActionButtonsToElement(bodyDiv);
@@ -259,7 +269,7 @@ export function _drawMessage(
   scroller.reApplyScroll();
 
   if (followUp) {
-    messageContainer.classList.add("message-followup");
+    messageContainer.classList.add("mt-0"); // Less margin for followups
   }
 
   return messageDiv;
@@ -286,8 +296,32 @@ export function addBlankTargetsToLinks(str) {
     if (!rel.includes("noopener")) rel.push("noopener");
     if (!rel.includes("noreferrer")) rel.push("noreferrer");
     anchor.setAttribute("rel", rel.join(" "));
+    
+    // Add styling classes to links
+    anchor.classList.add("text-blue-600", "dark:text-blue-400", "hover:underline");
   });
   return doc.body.innerHTML;
+}
+
+// === Helper Draw Functions ===
+
+function setBubbleStyle(messageDiv, styleType) {
+    // Reset base classes
+    messageDiv.className = "message-bubble relative p-4 text-sm rounded-xl shadow-sm max-w-[95%] md:max-w-[85%] group border";
+    
+    if (styleType === 'user') {
+        messageDiv.classList.add("bg-blue-50", "text-blue-900", "border-blue-100", "rounded-tr-none", "dark:bg-blue-900/40", "dark:border-blue-800", "dark:text-blue-100");
+    } else if (styleType === 'agent') {
+        messageDiv.classList.add("bg-white", "text-gray-900", "border-gray-200", "rounded-tl-none", "dark:bg-gray-800", "dark:border-gray-700", "dark:text-gray-100");
+    } else if (styleType === 'tool') {
+        messageDiv.classList.add("bg-gray-50", "text-gray-800", "border-gray-200", "rounded-xl", "dark:bg-gray-800/50", "dark:border-gray-700", "dark:text-gray-200");
+    } else if (styleType === 'error') {
+        messageDiv.classList.add("bg-red-50", "text-red-900", "border-red-100", "rounded-xl", "dark:bg-red-900/30", "dark:border-red-800", "dark:text-red-100");
+    } else if (styleType === 'warning') {
+        messageDiv.classList.add("bg-yellow-50", "text-yellow-900", "border-yellow-100", "rounded-xl", "dark:bg-yellow-900/30", "dark:border-yellow-800", "dark:text-yellow-100");
+    } else if (styleType === 'info') {
+        messageDiv.classList.add("bg-blue-50", "text-blue-800", "border-blue-100", "rounded-xl", "dark:bg-blue-900/30", "dark:border-blue-800", "dark:text-blue-100");
+    }
 }
 
 export function drawMessageDefault(
@@ -299,7 +333,7 @@ export function drawMessageDefault(
   temp,
   kvps = null
 ) {
-  _drawMessage(
+  const div = _drawMessage(
     messageContainer,
     heading,
     content,
@@ -307,11 +341,12 @@ export function drawMessageDefault(
     false,
     "message-default",
     kvps,
-    ["message-ai"],
-    ["msg-json"],
+    [],
+    [],
     false,
     false
   );
+  setBubbleStyle(div, 'agent');
 }
 
 export function drawMessageAgent(
@@ -329,7 +364,7 @@ export function drawMessageAgent(
     delete kvpsFlat["tool_args"];
   }
 
-  _drawMessage(
+  const div = _drawMessage(
     messageContainer,
     heading,
     content,
@@ -337,11 +372,12 @@ export function drawMessageAgent(
     false,
     "message-agent",
     kvpsFlat,
-    ["message-ai"],
-    ["msg-json"],
+    [],
+    ["msg-json"], // Add msg-json class to content for Show JSON toggle
     false,
     false
   );
+  setBubbleStyle(div, 'agent');
 }
 
 export function drawMessageResponse(
@@ -353,7 +389,7 @@ export function drawMessageResponse(
   temp,
   kvps = null
 ) {
-  _drawMessage(
+  const div = _drawMessage(
     messageContainer,
     heading,
     content,
@@ -361,35 +397,14 @@ export function drawMessageResponse(
     true,
     "message-agent-response",
     null,
-    ["message-ai"],
+    [],
     [],
     true,
     true
   );
-}
-
-export function drawMessageDelegation(
-  messageContainer,
-  id,
-  type,
-  heading,
-  content,
-  temp,
-  kvps = null
-) {
-  _drawMessage(
-    messageContainer,
-    heading,
-    content,
-    temp,
-    true,
-    "message-agent-delegation",
-    kvps,
-    ["message-ai", "message-agent"],
-    [],
-    true,
-    false
-  );
+  setBubbleStyle(div, 'agent');
+  // Add special styling for response
+  div.classList.add("ring-1", "ring-purple-100", "dark:ring-purple-900");
 }
 
 export function drawMessageUser(
@@ -403,37 +418,36 @@ export function drawMessageUser(
   latex = false
 ) {
   // Find existing message div or create new one
-  let messageDiv = messageContainer.querySelector(".message");
+  let messageDiv = messageContainer.querySelector(".message-bubble");
   if (!messageDiv) {
     messageDiv = document.createElement("div");
-    messageDiv.classList.add("message", "message-user");
+    // User bubble style
+    setBubbleStyle(messageDiv, 'user');
     messageContainer.appendChild(messageDiv);
-  } else {
-    // Ensure it has the correct classes if it already exists
-    messageDiv.className = "message message-user";
   }
 
   // Handle heading
   let headingElement = messageDiv.querySelector(".msg-heading");
   if (!headingElement) {
     headingElement = document.createElement("h4");
-    headingElement.classList.add("msg-heading");
+    headingElement.className = "msg-heading text-xs font-bold mb-2 flex items-center justify-end gap-2 opacity-70";
     messageDiv.insertBefore(headingElement, messageDiv.firstChild);
   }
-  headingElement.innerHTML = `${heading} <span class='icon material-symbols-outlined'>person</span>`;
+  headingElement.innerHTML = `${heading} <span class='material-symbols-outlined text-sm'>person</span>`;
 
   // Handle content
   let textDiv = messageDiv.querySelector(".message-text");
   if (content && content.trim().length > 0) {
     if (!textDiv) {
       textDiv = document.createElement("div");
-      textDiv.classList.add("message-text");
+      textDiv.className = "message-text whitespace-pre-wrap break-words break-all leading-relaxed";
       messageDiv.appendChild(textDiv);
     }
-    let spanElement = textDiv.querySelector("pre");
+    let spanElement = textDiv.querySelector("span.user-content");
     if (!spanElement) {
-      spanElement = document.createElement("pre");
-      textDiv.appendChild(spanElement);
+        spanElement = document.createElement("span");
+        spanElement.className = "user-content";
+        textDiv.appendChild(spanElement);
     }
     spanElement.innerHTML = escapeHTML(content);
     addActionButtonsToElement(textDiv);
@@ -446,7 +460,7 @@ export function drawMessageUser(
   if (kvps && kvps.attachments && kvps.attachments.length > 0) {
     if (!attachmentsContainer) {
       attachmentsContainer = document.createElement("div");
-      attachmentsContainer.classList.add("attachments-container");
+      attachmentsContainer.className = "attachments-container grid grid-cols-2 gap-2 mt-3";
       messageDiv.appendChild(attachmentsContainer);
     }
     // Important: Clear existing attachments to re-render, preventing duplicates on update
@@ -454,24 +468,20 @@ export function drawMessageUser(
 
     kvps.attachments.forEach((attachment) => {
       const attachmentDiv = document.createElement("div");
-      attachmentDiv.classList.add("attachment-item");
+      attachmentDiv.className = "attachment-item relative group overflow-hidden rounded-lg border border-blue-200 dark:border-blue-700 bg-white dark:bg-blue-900/20 hover:shadow-md transition-all cursor-pointer";
 
       const displayInfo = attachmentsStore.getAttachmentDisplayInfo(attachment);
 
       if (displayInfo.isImage) {
-        attachmentDiv.classList.add("image-type");
-
         const img = document.createElement("img");
         img.src = displayInfo.previewUrl;
         img.alt = displayInfo.filename;
-        img.classList.add("attachment-preview");
-        img.style.cursor = "pointer";
-
+        img.className = "w-full h-24 object-cover";
+        
         attachmentDiv.appendChild(img);
       } else {
-        // Render as file tile with title and icon
-        attachmentDiv.classList.add("file-type");
-
+        attachmentDiv.classList.add("flex", "items-center", "p-2", "gap-2");
+        
         // File icon
         if (
           displayInfo.previewUrl &&
@@ -480,13 +490,13 @@ export function drawMessageUser(
           const iconImg = document.createElement("img");
           iconImg.src = displayInfo.previewUrl;
           iconImg.alt = `${displayInfo.extension} file`;
-          iconImg.classList.add("file-icon");
+          iconImg.className = "w-8 h-8";
           attachmentDiv.appendChild(iconImg);
         }
 
         // File title
         const fileTitle = document.createElement("div");
-        fileTitle.classList.add("file-title");
+        fileTitle.className = "text-xs font-medium truncate max-w-full";
         fileTitle.textContent = displayInfo.filename;
 
         attachmentDiv.appendChild(fileTitle);
@@ -499,7 +509,6 @@ export function drawMessageUser(
   } else {
     if (attachmentsContainer) attachmentsContainer.remove();
   }
-  // The messageDiv is already appended or updated, no need to append again
 }
 
 export function drawMessageTool(
@@ -511,7 +520,7 @@ export function drawMessageTool(
   temp,
   kvps = null
 ) {
-  _drawMessage(
+  const div = _drawMessage(
     messageContainer,
     heading,
     content,
@@ -519,11 +528,12 @@ export function drawMessageTool(
     true,
     "message-tool",
     kvps,
-    ["message-ai"],
-    ["msg-output"],
+    [],
+    [], // was msg-output, handled in _drawMessage now
     false,
     false
   );
+  setBubbleStyle(div, 'tool');
 }
 
 export function drawMessageCodeExe(
@@ -535,7 +545,7 @@ export function drawMessageCodeExe(
   temp,
   kvps = null
 ) {
-  _drawMessage(
+  const div = _drawMessage(
     messageContainer,
     heading,
     content,
@@ -543,11 +553,13 @@ export function drawMessageCodeExe(
     true,
     "message-code-exe",
     null,
-    ["message-ai"],
+    [],
     [],
     false,
     false
   );
+  setBubbleStyle(div, 'tool'); // Use tool style for code exe too, or maybe darker
+  div.classList.add("bg-gray-100", "dark:bg-gray-900"); // Override background for code
 }
 
 export function drawMessageBrowser(
@@ -559,7 +571,7 @@ export function drawMessageBrowser(
   temp,
   kvps = null
 ) {
-  _drawMessage(
+  const div = _drawMessage(
     messageContainer,
     heading,
     content,
@@ -567,11 +579,12 @@ export function drawMessageBrowser(
     true,
     "message-browser",
     kvps,
-    ["message-ai"],
-    ["msg-json"],
+    [],
+    [],
     false,
     false
   );
+  setBubbleStyle(div, 'tool');
 }
 
 export function drawMessageAgentPlain(
@@ -584,7 +597,7 @@ export function drawMessageAgentPlain(
   temp,
   kvps = null
 ) {
-  _drawMessage(
+  const div = _drawMessage(
     messageContainer,
     heading,
     content,
@@ -597,7 +610,8 @@ export function drawMessageAgentPlain(
     false,
     false
   );
-  messageContainer.classList.add("center-container");
+  messageContainer.classList.add("justify-center"); // Center these messages
+  div.className = "message-bubble relative p-3 text-xs text-center rounded-lg bg-gray-100 text-gray-600 border border-gray-200 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 max-w-[90%]";
 }
 
 export function drawMessageInfo(
@@ -609,28 +623,7 @@ export function drawMessageInfo(
   temp,
   kvps = null
 ) {
-  return drawMessageAgentPlain(
-    "message-info",
-    messageContainer,
-    id,
-    type,
-    heading,
-    content,
-    temp,
-    kvps
-  );
-}
-
-export function drawMessageUtil(
-  messageContainer,
-  id,
-  type,
-  heading,
-  content,
-  temp,
-  kvps = null
-) {
-  _drawMessage(
+  const div = _drawMessage(
     messageContainer,
     heading,
     content,
@@ -639,11 +632,13 @@ export function drawMessageUtil(
     "message-util",
     kvps,
     [],
-    ["msg-json"],
+    [],
     false,
     false
   );
-  messageContainer.classList.add("center-container");
+  messageContainer.classList.add("justify-center");
+  // Flowbite-style subtle info card
+  div.className = "message-bubble relative px-4 py-2 text-xs text-center rounded-lg bg-gray-50 dark:bg-gray-800 text-gray-500 dark:text-gray-400 border border-gray-200 dark:border-gray-700 shadow-sm max-w-[90%]";
 }
 
 export function drawMessageWarning(
@@ -655,16 +650,21 @@ export function drawMessageWarning(
   temp,
   kvps = null
 ) {
-  return drawMessageAgentPlain(
-    "message-warning",
+  const div = _drawMessage(
     messageContainer,
-    id,
-    type,
     heading,
     content,
     temp,
-    kvps
+    false,
+    "message-warning",
+    kvps,
+    [],
+    [],
+    false,
+    false
   );
+  messageContainer.classList.add("justify-center");
+  setBubbleStyle(div, 'warning');
 }
 
 export function drawMessageError(
@@ -676,89 +676,21 @@ export function drawMessageError(
   temp,
   kvps = null
 ) {
-  return drawMessageAgentPlain(
-    "message-error",
+  const div = _drawMessage(
     messageContainer,
-    id,
-    type,
     heading,
     content,
     temp,
-    kvps
+    false,
+    "message-error",
+    kvps,
+    [],
+    [],
+    false,
+    false
   );
-}
-
-function drawKvps(container, kvps, latex) {
-  if (kvps) {
-    const table = document.createElement("table");
-    table.classList.add("msg-kvps");
-    for (let [key, value] of Object.entries(kvps)) {
-      const row = table.insertRow();
-      row.classList.add("kvps-row");
-      if (key === "thoughts" || key === "reasoning")
-        // TODO: find a better way to determine special class assignment
-        row.classList.add("msg-thoughts");
-
-      const th = row.insertCell();
-      th.textContent = convertToTitleCase(key);
-      th.classList.add("kvps-key");
-
-      const td = row.insertCell();
-      const tdiv = document.createElement("div");
-      tdiv.classList.add("kvps-val");
-      td.appendChild(tdiv);
-
-      if (Array.isArray(value)) {
-        for (const item of value) {
-          addValue(item);
-        }
-      } else {
-        addValue(value);
-      }
-
-      addActionButtonsToElement(tdiv);
-
-      // autoscroll the KVP value if needed
-      // if (getAutoScroll()) #TODO needs a better redraw system
-      setTimeout(() => {
-        tdiv.scrollTop = tdiv.scrollHeight;
-      }, 0);
-
-      function addValue(value) {
-        if (typeof value === "object") value = JSON.stringify(value, null, 2);
-
-        if (typeof value === "string" && value.startsWith("img://")) {
-          const imgElement = document.createElement("img");
-          imgElement.classList.add("kvps-img");
-          imgElement.src = value.replace("img://", "/image_get?path=");
-          imgElement.alt = "Image Attachment";
-          tdiv.appendChild(imgElement);
-
-          // Add click handler and cursor change
-          imgElement.style.cursor = "pointer";
-          imgElement.addEventListener("click", () => {
-            openImageModal(imgElement.src, 1000);
-          });
-        } else {
-          const pre = document.createElement("pre");
-          const span = document.createElement("span");
-          span.innerHTML = convertHTML(value);
-          pre.appendChild(span);
-          tdiv.appendChild(pre);
-
-          // KaTeX rendering for markdown
-          if (latex) {
-            span.querySelectorAll("latex").forEach((element) => {
-              katex.render(element.innerHTML, element, {
-                throwOnError: false,
-              });
-            });
-          }
-        }
-      }
-    }
-    container.appendChild(table);
-  }
+  messageContainer.classList.add("justify-center");
+  setBubbleStyle(div, 'error');
 }
 
 function drawKvpsIncremental(container, kvps, latex) {
@@ -767,12 +699,12 @@ function drawKvpsIncremental(container, kvps, latex) {
     let table = container.querySelector(".msg-kvps");
     if (!table) {
       table = document.createElement("table");
-      table.classList.add("msg-kvps");
+      table.className = "msg-kvps w-full text-sm text-left mt-3 border-separate border-spacing-y-2";
       container.appendChild(table);
     }
 
     // Get all current rows for comparison
-    let existingRows = table.querySelectorAll(".kvps-row");
+    let existingRows = table.querySelectorAll("tr");
     const kvpEntries = Object.entries(kvps);
 
     // Update or create rows as needed
@@ -782,33 +714,53 @@ function drawKvpsIncremental(container, kvps, latex) {
       if (!row) {
         // Create new row if it doesn't exist
         row = table.insertRow();
-        row.classList.add("kvps-row");
       }
 
-      // Update row classes
+      // Update row classes - Flowbite consistent styling with color coding
       row.className = "kvps-row";
+      
+      // Color-coded backgrounds based on key type + preference toggle classes
       if (key === "thoughts" || key === "reasoning") {
-        row.classList.add("msg-thoughts");
+        row.classList.add("bg-purple-50", "dark:bg-purple-900/20", "msg-thoughts");
+      } else if (key === "text" || key === "content" || key === "response") {
+        row.classList.add("bg-green-50", "dark:bg-green-900/20");
       }
 
-      // Handle key cell
-      let th = row.querySelector(".kvps-key");
+      // Handle key cell - Color-coded label styling based on key type
+      let th = row.querySelector("th");
       if (!th) {
-        th = row.insertCell(0);
-        th.classList.add("kvps-key");
+        th = document.createElement("th");
+        row.appendChild(th);
       }
+      
+      // Apply color based on key type for better differentiation
+      let labelColor = "text-blue-600 dark:text-blue-400"; // default
+      if (key === "thoughts" || key === "reasoning") {
+        labelColor = "text-purple-600 dark:text-purple-400";
+      } else if (key === "headline" || key === "tool_name") {
+        labelColor = "text-amber-600 dark:text-amber-400";
+      } else if (key === "text" || key === "content" || key === "response") {
+        labelColor = "text-green-600 dark:text-green-400";
+      } else if (key === "query" || key === "memories") {
+        labelColor = "text-cyan-600 dark:text-cyan-400";
+      } else if (key === "result" || key === "finished") {
+        labelColor = "text-emerald-600 dark:text-emerald-400";
+      }
+      th.className = `kvps-key py-1.5 pr-3 font-semibold whitespace-nowrap align-top ${labelColor} w-1 text-xs uppercase tracking-wide`;
       th.textContent = convertToTitleCase(key);
 
       // Handle value cell
-      let td = row.cells[1];
+      let td = row.querySelector("td");
       if (!td) {
-        td = row.insertCell(1);
+        td = document.createElement("td");
+        td.className = "py-1.5 align-top break-all";
+        row.appendChild(td);
       }
 
       let tdiv = td.querySelector(".kvps-val");
       if (!tdiv) {
         tdiv = document.createElement("div");
-        tdiv.classList.add("kvps-val");
+        tdiv.className = "kvps-val text-gray-700 dark:text-gray-300";
         td.appendChild(tdiv);
       }
 
@@ -836,7 +788,7 @@ function drawKvpsIncremental(container, kvps, latex) {
     while (existingRows.length > kvpEntries.length) {
       const lastRow = existingRows[existingRows.length - 1];
       lastRow.remove();
-      existingRows = table.querySelectorAll(".kvps-row");
+      existingRows = table.querySelectorAll("tr");
     }
 
     function addValue(value, tdiv) {
@@ -844,30 +796,29 @@ function drawKvpsIncremental(container, kvps, latex) {
 
       if (typeof value === "string" && value.startsWith("img://")) {
         const imgElement = document.createElement("img");
-        imgElement.classList.add("kvps-img");
+        imgElement.className = "max-w-xs rounded shadow-sm hover:opacity-90 transition-opacity cursor-pointer mt-1";
         imgElement.src = value.replace("img://", "/image_get?path=");
         imgElement.alt = "Image Attachment";
         tdiv.appendChild(imgElement);
 
-        // Add click handler and cursor change
-        imgElement.style.cursor = "pointer";
         imgElement.addEventListener("click", () => {
           imageViewerStore.open(imgElement.src, { refreshInterval: 1000 });
         });
       } else {
         const pre = document.createElement("pre");
+        pre.className = "whitespace-pre-wrap font-sans text-sm"; // Default to sans for most values
+        
+        // If value looks like code or JSON, use Flowbite code block styling
+        const valueStr = typeof value === 'string' ? value : JSON.stringify(value);
+        if (valueStr && (valueStr.includes('\n') || valueStr.includes('{') || valueStr.includes('  '))) {
+            pre.className = "whitespace-pre-wrap font-mono text-xs bg-gray-100 dark:bg-gray-900 p-3 rounded-lg border border-gray-200 dark:border-gray-700 mt-2 overflow-x-auto";
+        }
+
         const span = document.createElement("span");
-        span.innerHTML = convertHTML(value);
+        span.innerHTML = escapeHTML(valueStr);
         pre.appendChild(span);
         tdiv.appendChild(pre);
 
-        // Add action buttons to the row
-        // const row = tdiv.closest(".kvps-row");
-        // if (row) {
-          // addActionButtonsToElement(pre);
-        // }
-
-        // KaTeX rendering for markdown
         if (latex) {
           span.querySelectorAll("latex").forEach((element) => {
             katex.render(element.innerHTML, element, {
@@ -903,20 +854,11 @@ function convertImageTags(content) {
   const updatedContent = content.replace(
     imageTagRegex,
     (match, base64Content) => {
-      return `<img src="data:image/jpeg;base64,${base64Content}" alt="Image Attachment" style="max-width: 250px !important;"/>`;
+      return `<img src="data:image/jpeg;base64,${base64Content}" alt="Image Attachment" class="max-w-xs rounded shadow-sm my-2" />`;
     }
   );
 
   return updatedContent;
-}
-
-function convertHTML(str) {
-  if (typeof str !== "string") str = JSON.stringify(str, null, 2);
-
-  let result = escapeHTML(str);
-  result = convertImageTags(result);
-  result = convertPathsToLinks(result);
-  return result;
 }
 
 function convertImgFilePaths(str) {
@@ -926,7 +868,7 @@ function convertImgFilePaths(str) {
 export function convertIcons(str) {
   return str.replace(
     /icon:\/\/([a-zA-Z0-9_]+)/g,
-    '<span class="icon material-symbols-outlined">$1</span>'
+    '<span class="material-symbols-outlined align-text-bottom text-base mr-1">$1</span>'
   );
 }
 
@@ -949,7 +891,7 @@ function convertPathsToLinks(str) {
     let html = "";
     for (const part of parts) {
       conc += "/" + part;
-      html += `/<a href="#" class="path-link" onclick="openFileLink('${conc}');">${part}</a>`;
+      html += `/<a href="#" class="text-blue-600 dark:text-blue-400 hover:underline" onclick="openFileLink('${conc}');">${part}</a>`;
     }
     return html;
   }
@@ -983,10 +925,45 @@ function adjustMarkdownRender(element) {
 
   // wrap each with a div with class message-markdown-table-wrap
   elements.forEach((el) => {
+    // Add Flowbite table classes
+    el.classList.add("w-full", "text-sm", "text-left", "text-gray-500", "dark:text-gray-400", "border-collapse", "my-2");
+    
+    // Add styles to th and td
+    el.querySelectorAll('th').forEach(th => {
+        th.className = "px-4 py-2 bg-gray-50 dark:bg-gray-700 text-gray-700 dark:text-gray-200 border border-gray-200 dark:border-gray-600 font-semibold";
+    });
+    el.querySelectorAll('td').forEach(td => {
+        td.className = "px-4 py-2 border border-gray-200 dark:border-gray-600";
+    });
+
     const wrapper = document.createElement("div");
-    wrapper.className = "message-markdown-table-wrap";
+    wrapper.className = "overflow-x-auto rounded-lg border border-gray-200 dark:border-gray-700 my-2";
     el.parentNode.insertBefore(wrapper, el);
     wrapper.appendChild(el);
+  });
+  
+  // Style blockquotes
+  element.querySelectorAll('blockquote').forEach(bq => {
+      bq.className = "border-l-4 border-gray-300 dark:border-gray-600 pl-4 italic my-2 text-gray-600 dark:text-gray-400";
+  });
+  
+  // Style lists
+  element.querySelectorAll('ul').forEach(ul => {
+      ul.className = "list-disc list-inside space-y-1 my-2";
+  });
+  element.querySelectorAll('ol').forEach(ol => {
+      ol.className = "list-decimal list-inside space-y-1 my-2";
+  });
+  
+  // Style code blocks
+  element.querySelectorAll('pre code').forEach(code => {
+      // Styling is handled by pre wrapper usually, but ensuring font
+      code.classList.add("font-mono", "text-sm");
+  });
+  
+  // Inline code
+  element.querySelectorAll(':not(pre) > code').forEach(code => {
+      code.className = "font-mono text-xs bg-gray-100 dark:bg-gray-700 text-red-500 dark:text-red-400 px-1 py-0.5 rounded";
   });
 }
 

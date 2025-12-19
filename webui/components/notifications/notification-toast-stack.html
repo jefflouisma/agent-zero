@@ -9,216 +9,48 @@
     <div x-data>
         <template x-if="$store.notificationStore">
             <!-- Toast Stack Container -->
-            <div class="toast-stack-container"
+            <div class="fixed bottom-5 right-5 z-[15000] flex flex-col-reverse gap-2 items-end pointer-events-none w-full max-w-xs md:max-w-sm"
                  x-show="$store.notificationStore.toastStack.length > 0">
 
             <template x-for="(toast, index) in $store.notificationStore.toastStack" :key="toast.toastId">
-                <div class="toast-item"
+                <div class="pointer-events-auto flex items-start w-full p-4 text-gray-500 bg-white rounded-lg shadow-lg dark:text-gray-400 dark:bg-gray-800 border border-gray-200 dark:border-gray-700"
                      :class="$store.notificationStore.getNotificationClass(toast.type)"
                      @click="$store.notificationStore.handleToastClick(toast.toastId)"
-                     x-transition:enter="toast-enter"
-                     x-transition:leave="toast-leave">
+                     x-transition:enter="transition ease-out duration-300"
+                     x-transition:enter-start="translate-x-full opacity-0"
+                     x-transition:enter-end="translate-x-0 opacity-100"
+                     x-transition:leave="transition ease-in duration-200"
+                     x-transition:leave-start="translate-x-0 opacity-100"
+                     x-transition:leave-end="translate-x-full opacity-0">
 
                     <!-- Toast Icon -->
-                    <div class="toast-icon"
+                    <div class="inline-flex items-center justify-center shrink-0 w-8 h-8 rounded-lg"
+                         :class="$store.notificationStore.getNotificationIconClass(toast.type)"
                          x-html="$store.notificationStore.getNotificationIcon(toast.type)">
                     </div>
 
                     <!-- Toast Content -->
-                    <div class="toast-content">
-                        <div class="toast-title"
+                    <div class="ml-3 text-sm font-normal flex-1 break-words">
+                        <div class="text-sm font-semibold text-gray-900 dark:text-white mb-1"
                              x-show="toast.title"
                              x-text="toast.title">
                         </div>
-                        <div class="toast-message"
+                        <div class="text-sm"
                              x-text="toast.message">
                         </div>
-                        <!-- <div class="toast-timestamp"
-                             x-text="$store.notificationStore.formatTimestamp(toast.timestamp)">
-                        </div> -->
                     </div>
 
                     <!-- Toast Dismiss -->
-                    <button class="toast-dismiss"
+                    <button type="button" 
+                            class="ml-auto -mx-1.5 -my-1.5 bg-white text-gray-400 hover:text-gray-900 rounded-lg focus:ring-2 focus:ring-gray-300 p-1.5 hover:bg-gray-100 inline-flex items-center justify-center h-8 w-8 dark:text-gray-500 dark:hover:text-white dark:bg-gray-800 dark:hover:bg-gray-700" 
                             @click.stop="$store.notificationStore.dismissToast(toast.toastId)"
-                            title="Dismiss">
-                        <span class="material-symbols-outlined">close</span>
+                            aria-label="Close">
+                        <span class="material-symbols-outlined text-base">close</span>
                     </button>
                 </div>
             </template>
           </div>
         </template>
     </div>
-
-    <style>
-        /* Toast Stack Container */
-        .toast-stack-container {
-            position: absolute;
-            bottom: 5px; /* Spacing from the bottom of the zero-height container */
-            padding-right: 5px;
-            z-index: 15000;
-            display: flex;
-            flex-direction: column-reverse; /* Stack toasts upwards */
-            gap: 8px;
-            pointer-events: none;
-            max-width: 400px;
-            right: 5px; /* Anchor to the right */
-            align-items: flex-end;
-        }
-
-        /* Individual Toast Items */
-        .toast-item {
-            pointer-events: auto;
-            display: flex;
-            align-items: flex-start;
-            gap: 12px;
-            padding: 16px;
-            background: var(--color-panel);
-            border: 1px solid var(--color-border);
-            border-radius: 8px;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            /* backdrop-filter: blur(10px); */
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-            position: relative;
-            min-height: 60px;
-            max-height: 15em;
-            overflow-y: auto;
-        }
-
-        .toast-item:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
-        }
-
-        /* Toast Type Styling */
-        .toast-item.notification-info {
-            border-left: 4px solid #2196F3;
-            /* background: rgba(33, 150, 243, 0.1); */
-        }
-
-        .toast-item.notification-success {
-            border-left: 4px solid #4CAF50;
-            /* background: rgba(76, 175, 80, 0.1); */
-        }
-
-        .toast-item.notification-warning {
-            border-left: 4px solid #FF9800;
-            /* background: rgba(255, 152, 0, 0.1); */
-        }
-
-        .toast-item.notification-error {
-            border-left: 4px solid #F44336;
-            /* background: rgba(244, 67, 54, 0.1); */
-        }
-
-        .toast-item.notification-progress {
-            border-left: 4px solid #9C27B0;
-            /* background: rgba(156, 39, 176, 0.1); */
-        }
-
-        /* Toast Icon */
-        .toast-icon {
-            font-size: 1.2rem;
-            line-height: 1;
-            min-width: 24px;
-            text-align: center;
-            margin-top: 2px;
-        }
-
-        /* Toast Content */
-        .toast-content {
-            flex: 1;
-            min-width: 0;
-        }
-
-        .toast-title {
-            font-weight: 600;
-            font-size: 0.9rem;
-            color: var(--color-primary);
-            margin-bottom: 4px;
-            line-height: 1.3;
-        }
-
-        .toast-message {
-            font-size: 0.85rem;
-            color: var(--color-text);
-            line-height: 1.4;
-            margin-bottom: 4px;
-        }
-
-        .toast-timestamp {
-            font-size: 0.75rem;
-            color: var(--color-text);
-            opacity: 0.6;
-        }
-
-        /* Toast Dismiss */
-        .toast-dismiss {
-            background: transparent; /* No background by default */
-            border: none;
-            border-radius: 4px;
-            color: var(--color-text);
-            cursor: pointer;
-            padding: 4px 6px;
-            font-size: 0.8rem;
-            transition: all 0.2s ease;
-            opacity: 1; /* Always visible */
-        }
-
-        .toast-dismiss:hover {
-            background: var(--color-panel);
-            color: var(--color-primary);
-        }
-
-        /* Toast Animations */
-        .toast-enter {
-            transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
-            opacity: 0;
-            transform: translateX(100%) scale(0.8);
-        }
-
-        .toast-leave {
-            transition: all 0.2s ease;
-            opacity: 0;
-            transform: translateX(100%) scale(0.8);
-        }
-
-
-        /* Mobile Responsive */
-        @media (max-width: 768px) {
-            .toast-stack-container {
-                bottom: 10px;
-                right: 10px;
-                left: 10px;
-                max-width: none;
-            }
-
-            .toast-item {
-                padding: 12px;
-                font-size: 0.9rem;
-            }
-
-            .toast-title {
-                font-size: 0.85rem;
-            }
-
-            .toast-message {
-                font-size: 0.8rem;
-            }
-        }
-
-        /* Accessibility */
-        @media (prefers-reduced-motion: reduce) {
-            .toast-enter,
-            .toast-leave {
-                transition: none;
-            }
-
-            .toast-item:hover {
-                transform: none;
-            }
-        }
-    </style>
 </body>
 </html>

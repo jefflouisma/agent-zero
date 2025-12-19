@@ -11,70 +11,74 @@
 <body>
     <div x-data>
         <template x-if="$store.projects && $store.chats">
-            <div>
-                <p class="projects-intro">Projects in Agent Zero are used to separate different use cases with custom
-                    instructions and files.
-                    You can create projects for your tasks and switch between them easily.</p>
-                <div class="projects-list-header">
-                    <div x-show="$store.chats.selectedContext && $store.chats.selectedContext?.project" class="active-project-display">
-                        <span style="display: inline-flex; align-items: center; gap: 0.5em;">
-                            <span>Active:</span>
-                            <span class="project-color-ball" :style="$store.chats.selectedContext?.project?.color ? { backgroundColor: $store.chats.selectedContext?.project?.color } : { border: '1px solid var(--color-border)' }"></span>
+            <div class="p-1">
+                <p class="mb-6 text-sm text-gray-500 dark:text-gray-400">Projects in Agent Zero are used to separate different use cases with custom instructions and files. You can create projects for your tasks and switch between them easily.</p>
+                
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-4">
+                    <div x-show="$store.chats.selectedContext && $store.chats.selectedContext?.project" class="flex items-center gap-2 p-2 bg-blue-50 border border-blue-200 rounded-lg dark:bg-blue-900/20 dark:border-blue-800">
+                        <span class="flex items-center gap-2 text-sm text-gray-900 dark:text-white px-2">
+                            <span class="text-gray-500 dark:text-gray-400">Active:</span>
+                            <span class="w-3 h-3 rounded-full border border-gray-200 dark:border-gray-600" :style="$store.chats.selectedContext?.project?.color ? { backgroundColor: $store.chats.selectedContext?.project?.color, border: 'none' } : {}"></span>
                             <strong x-text="$store.chats.selectedContext?.project?.name"></strong>
                         </span>
-                        <button type="button" class="button cancel icon-button" title="Deactivate" @click="$store.projects.deactivateProject()">
-                            <span class="icon material-symbols-outlined">close</span>
-                        </button>
-                        <button type="button" class="button icon-button" title="Edit" @click="$store.projects.openEditModal($store.chats.selectedContext?.project?.name)">
-                            <span class="icon material-symbols-outlined">edit</span>
-                        </button>
+                        <div class="flex items-center border-l border-blue-200 dark:border-blue-800 pl-2 ml-1 space-x-1">
+                            <button type="button" class="p-1.5 text-gray-500 hover:text-blue-600 hover:bg-white rounded-md transition-colors dark:text-gray-400 dark:hover:text-blue-400 dark:hover:bg-gray-800" title="Edit" @click="$store.projects.openEditModal($store.chats.selectedContext?.project?.name)">
+                                <span class="material-symbols-outlined text-lg">edit</span>
+                            </button>
+                            <button type="button" class="p-1.5 text-gray-500 hover:text-red-600 hover:bg-white rounded-md transition-colors dark:text-gray-400 dark:hover:text-red-400 dark:hover:bg-gray-800" title="Deactivate" @click="$store.projects.deactivateProject()">
+                                <span class="material-symbols-outlined text-lg">close</span>
+                            </button>
+                        </div>
                     </div>
-                    <button @click="$store.projects.openCreateModal()" type="button"
-                        class="button projects-create-btn-top">
-                        <span class="icon material-symbols-outlined">add</span> Create project
+                    
+                    <button @click="$store.projects.openCreateModal()" type="button" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-4 py-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800 flex items-center gap-2 ml-auto">
+                        <span class="material-symbols-outlined text-lg">add</span> Create project
                     </button>
                 </div>
 
-                <template :key="project.name" x-for="project in $store.projects.projectList">
-                    <div class="projects-project-card" :class="{ 'projects-active': project.name === $store.chats.selectedContext?.project?.name }">
-                        <div class="projects-project-card-header" style="display: flex; align-items: start; justify-content: space-between; gap: 1em;">
-  <div>
-    <div class="projects-project-card-title">
-        <span class="project-color-ball" :style="project.color ? { backgroundColor: project.color } : { border: '1px solid var(--color-border)' }"></span>
-        <span x-text="project.title"></span>
-    </div>
-    <div class="projects-project-card-name">/<span x-text="project.name"></span></div>
-  </div>
-  <div class="projects-project-card-actions" style="display: flex; gap: 0.5em;">
-    <template x-if="$store.chats.selectedContext && project.name === $store.chats.selectedContext?.project?.name">
-      <button type="button" class="button cancel" title="Deactivate" style="width:9em" @click="$store.projects.deactivateProject()">
-        <span class="icon material-symbols-outlined">close</span> Deactivate
-      </button>
-    </template>
-    <template x-if="$store.chats.selectedContext && project.name !== $store.chats.selectedContext?.project?.name">
-      <button type="button" class="button confirm" title="Activate" style="width:9em" @click="$store.projects.activateProject(project.name)">
-        <span class="icon material-symbols-outlined">play_arrow</span> Activate
-      </button>
-    </template>
-    <button type="button" class="button icon-button" title="Edit" @click="$store.projects.openEditModal(project.name)">
-      <span class="icon material-symbols-outlined">edit</span>
-    </button>
-    <button type="button" class="button cancel icon-button" title="Delete" @click="$store.projects.deleteProject(project.name)">
-      <span class="icon material-symbols-outlined">delete</span>
-    </button>
-  </div>
-</div>
-<!-- <div class="projects-project-card-description"><span x-text="project.description"></span></div> -->
-                    </div>
-                </template>
+                <div class="space-y-4">
+                    <template :key="project.name" x-for="project in $store.projects.projectList">
+                        <div class="p-4 bg-white border rounded-lg shadow-sm dark:bg-gray-800 dark:border-gray-700 transition-all hover:shadow-md" 
+                             :class="{ 'border-blue-500 ring-1 ring-blue-500 dark:border-blue-500': project.name === $store.chats.selectedContext?.project?.name, 'border-gray-200': project.name !== $store.chats.selectedContext?.project?.name }">
+                            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                                <div>
+                                    <div class="flex items-center gap-2 mb-1">
+                                        <span class="w-3 h-3 rounded-full border border-gray-200 dark:border-gray-600 shrink-0" :style="project.color ? { backgroundColor: project.color, border: 'none' } : {}"></span>
+                                        <h3 class="text-lg font-semibold text-gray-900 dark:text-white" x-text="project.title"></h3>
+                                    </div>
+                                    <div class="text-sm font-mono text-gray-500 dark:text-gray-400 ml-5">/<span x-text="project.name"></span></div>
+                                </div>
+                                
+                                <div class="flex items-center gap-2 self-end sm:self-auto">
+                                    <template x-if="$store.chats.selectedContext && project.name === $store.chats.selectedContext?.project?.name">
+                                        <button type="button" class="py-2 px-3 text-xs font-medium text-gray-900 focus:outline-none bg-white rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-4 focus:ring-gray-200 dark:focus:ring-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700 flex items-center gap-1" @click="$store.projects.deactivateProject()">
+                                            <span class="material-symbols-outlined text-sm">close</span> Deactivate
+                                        </button>
+                                    </template>
+                                    <template x-if="$store.chats.selectedContext && project.name !== $store.chats.selectedContext?.project?.name">
+                                        <button type="button" class="py-2 px-3 text-xs font-medium text-white bg-blue-700 rounded-lg hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800 flex items-center gap-1" @click="$store.projects.activateProject(project.name)">
+                                            <span class="material-symbols-outlined text-sm">play_arrow</span> Activate
+                                        </button>
+                                    </template>
+                                    
+                                    <button type="button" class="p-2 text-gray-500 hover:text-gray-900 bg-gray-100 hover:bg-gray-200 rounded-lg dark:bg-gray-700 dark:text-gray-400 dark:hover:text-white dark:hover:bg-gray-600 transition-colors" title="Edit" @click="$store.projects.openEditModal(project.name)">
+                                        <span class="material-symbols-outlined text-lg">edit</span>
+                                    </button>
+                                    <button type="button" class="p-2 text-gray-500 hover:text-red-600 bg-gray-100 hover:bg-gray-200 rounded-lg dark:bg-gray-700 dark:text-gray-400 dark:hover:text-red-400 dark:hover:bg-gray-600 transition-colors" title="Delete" @click="$store.projects.deleteProject(project.name)">
+                                        <span class="material-symbols-outlined text-lg">delete</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </template>
+                </div>
 
                 <template x-if="$store.projects.projectList.length === 0">
-                    <div class="projects-no-projects">
-                        <div class="projects-project-card-title">There are no projects yet</div>
-                        <div class="projects-no-projects-actions">
-                            <button @click="$store.projects.openCreateModal()" type="button"
-                                class="button"><span class="icon material-symbols-outlined">add</span>Create project</button>
-                        </div>
+                    <div class="flex flex-col items-center justify-center p-8 bg-gray-50 border-2 border-dashed border-gray-300 rounded-lg dark:bg-gray-800/50 dark:border-gray-700">
+                        <p class="mb-4 text-lg text-gray-500 dark:text-gray-400">There are no projects yet</p>
+                        <button @click="$store.projects.openCreateModal()" type="button" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800 flex items-center gap-2">
+                            <span class="material-symbols-outlined text-lg">add</span> Create project
+                        </button>
                     </div>
                 </template>
 
@@ -82,94 +86,4 @@
         </template>
     </div>
 </body>
-<style>
-    .projects-project-card {
-        border: 1px solid var(--color-border);
-        border-radius: 0.5em;
-        padding: 1em;
-        margin-top: 1em;
-    }
-
-    .projects-project-card.projects-active {
-        border-color: var(--color-highlight);
-    }
-
-    .projects-project-card-title {
-        font-weight: bold;
-        font-size: 1.2em;
-        display: flex;
-        align-items: center;
-    }
-    .projects-project-card-name {
-        margin-top: var(--spacing-xs);
-    }
-
-    .project-color-ball {
-        width: 0.6em;
-        height: 0.6em;
-        border-radius: 50%;
-        display: inline-block;
-        margin-right: 0.5em;
-        flex-shrink: 0;
-        box-sizing: border-box;
-    }
-
-    .projects-project-card-description {
-        font-size: 0.9em;
-        color: var(--color-text);
-    }
-
-    .projects-no-projects {
-        border: 1px dashed var(--color-border);
-        border-radius: 0.5em;
-        padding: 2em;
-        margin: 1em;
-        text-align: center;
-        background: var(--color-panel);
-    }
-
-    .projects-no-projects-actions {
-        margin-top: 1em;
-        display: flex;
-        justify-content: center;
-    }
-
-    .projects-create-btn-top {
-        float: right;
-        margin: var(--spacing-xs) var(--spacing-md);
-    }
-
-    .projects-list-header {
-        width: 100%;
-        display: flex;
-        justify-content: flex-end;
-        align-items: center;
-        margin-bottom: 0.5em;
-    }
-
-    .active-project-display {
-        display: flex;
-        align-items: center;
-        gap: 0.5em;
-        border: 1px solid var(--color-highlight);
-        padding: 0.5em;
-        border-radius: 0.5em;
-        margin-right: auto;
-    }
-
-  @media (max-width: 600px) {
-    .projects-list-header {
-      flex-wrap: wrap;
-      gap: 1em;
-    }
-    .projects-project-card-header {
-      flex-direction: column;
-      gap: 1em;
-    }
-    .active-project-display {
-      width: 100%;
-      justify-content: space-between;
-    }
-  }
-</style>
 </html>

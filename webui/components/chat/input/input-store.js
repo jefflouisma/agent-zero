@@ -1,6 +1,7 @@
 import { createStore } from "/js/AlpineStore.js";
 import * as shortcuts from "/js/shortcuts.js";
 import { store as fileBrowserStore } from "/components/modals/file-browser/file-browser-store.js";
+import { callJsonApi } from "/js/api.js";
 
 const model = {
   paused: false,
@@ -116,16 +117,12 @@ const model = {
 
         formData.append("ctxid", globalThis.getContext());
 
-        const response = await globalThis.fetchApi("/import_knowledge", {
+        const data = await callJsonApi("/import_knowledge", {
           method: "POST",
           body: formData,
         });
 
-        if (!response.ok) {
-          if (globalThis.toast)
-            globalThis.toast(await response.text(), "error");
-        } else {
-          const data = await response.json();
+        if (data && data.filenames) {
           if (globalThis.toast) {
             globalThis.toast(
               "Knowledge files imported: " + data.filenames.join(", "),

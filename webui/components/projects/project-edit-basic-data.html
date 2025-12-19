@@ -13,57 +13,50 @@
             <div>
 
                 <template x-if="!$store.projects.selectedProject._meta.creating">
-                    <div class="projects-form-group">
-                        <label class="projects-form-label">Folder name</label>
-                        <span class="projects-form-description">Project files and settings are located in
-                            <strong><span
-                                    x-text="$store.projects.getSelectedAbsPath()"></span></strong></span>
-                        <div class="projects-input-with-button-wrapper">
-                            <input class="projects-form-input projects-disabled" type="text" x-model="$store.projects.selectedProject.name" disabled>
-                            <button class="button icon-button" @click="$store.projects.browseSelected()">
-                                <span class="icon material-symbols-outlined">folder</span>
+                    <div class="mb-4">
+                        <label class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Folder name</label>
+                        <p class="mb-2 text-xs text-gray-500 dark:text-gray-400">Project files and settings are located in <strong class="text-gray-900 dark:text-white"><span x-text="$store.projects.getSelectedAbsPath()"></span></strong></p>
+                        <div class="flex gap-2">
+                            <input class="bg-gray-100 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 cursor-not-allowed dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-gray-400 dark:focus:ring-blue-500 dark:focus:border-blue-500" 
+                                type="text" x-model="$store.projects.selectedProject.name" disabled>
+                            <button class="py-2.5 px-4 text-sm font-medium text-gray-900 focus:outline-none bg-white rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-4 focus:ring-gray-200 dark:focus:ring-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700 flex items-center gap-2" 
+                                @click="$store.projects.browseSelected()">
+                                <span class="material-symbols-outlined text-lg">folder</span>
                                 <span>Browse</span>
                             </button>
                         </div>
                     </div>
                 </template>
 
-                <div class="projects-form-group">
-                    <label class="projects-form-label">Title</label>
-                    <span class="projects-form-description">Title and description are visible to both you and the agent
-                        and can help it understand the project.</span>
-                    <input class="projects-form-input" type="text" x-model="$store.projects.selectedProject.title"
-                        placeholder="Optional title">
+                <div class="mb-4">
+                    <label class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Title</label>
+                    <p class="mb-2 text-xs text-gray-500 dark:text-gray-400">Title and description are visible to both you and the agent and can help it understand the project.</p>
+                    <input class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" 
+                        type="text" x-model="$store.projects.selectedProject.title" placeholder="Optional title">
                 </div>
 
-                <!-- <div class="projects-form-group">
-                    <label class="projects-form-label">Description</label>
-                    <textarea class="projects-form-textarea" x-model="$store.projects.selectedProject.description"
-                        rows="5" placeholder="Optional description"></textarea>
-                </div> -->
-
-                <div class="projects-form-group">
-                    <label class="projects-form-label">Color</label>
-                    <div class="projects-color-row">
-                        <div class="projects-color-ball projects-color-none"
-                            :class="{'selected': !$store.projects.selectedProject.color}"
+                <div class="mb-4">
+                    <label class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Color</label>
+                    <div class="flex flex-wrap gap-2 items-center">
+                        <div class="w-8 h-8 rounded-full cursor-pointer flex items-center justify-center border border-gray-200 dark:border-gray-600 hover:opacity-80 transition-opacity bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400"
+                            :class="{'ring-2 ring-offset-2 ring-blue-500 dark:ring-offset-gray-800': !$store.projects.selectedProject.color}"
                             @click="$store.projects.selectedProject.color = ''">
-                            <span class="projects-color-x">×</span>
+                            <span class="text-xl leading-none">×</span>
                         </div>
                         <template x-for="c in $store.projects.colors" :key="c">
-                            <div class="projects-color-ball" :style="`background:${c}`"
-                                :class="{'selected': $store.projects.selectedProject.color === c}"
+                            <div class="w-8 h-8 rounded-full cursor-pointer hover:opacity-90 transition-opacity" 
+                                :style="`background:${c}`"
+                                :class="{'ring-2 ring-offset-2 ring-blue-500 dark:ring-offset-gray-800': $store.projects.selectedProject.color === c}"
                                 @click="$store.projects.selectedProject.color = c">
                             </div>
                         </template>
                     </div>
                 </div>
             </div>
-
-
         </template>
     </div>
 </body>
+
 <style>
     .project-path {
         font-size: 0.8em;

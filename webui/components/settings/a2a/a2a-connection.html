@@ -10,18 +10,17 @@
         <p>Other agents can connect using the URL below (replace host if needed):</p>
 
         <!-- API Token Information -->
-        <div
-            style="background-color: var(--color-bg-secondary); border: 1px solid var(--color-border); border-radius: 6px; padding: 12px; margin: 16px 0;">
-            <h4 style="margin: 0 0 8px 0; color: var(--color-text-primary);">API Token Information</h4>
-            <p style="margin: 0; color: var(--color-text-secondary); font-size: 14px;">
+        <div class="bg-gray-50 border border-gray-200 rounded-lg p-3 my-4 dark:bg-gray-800 dark:border-gray-700">
+            <h4 class="m-0 mb-2 font-semibold text-gray-900 dark:text-white">API Token Information</h4>
+            <p class="m-0 text-sm text-gray-600 dark:text-gray-400">
                 The token used in the URL is automatically generated from your username and password.
                 This same token is also used for external API endpoints. The token changes when you update your
                 credentials.
             </p>
         </div>
 
-        <h3>A2A Connection URL</h3>
-        <div id="a2a-connection-example"></div>
+        <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-2">A2A Connection URL</h3>
+        <div id="a2a-connection-example" class="w-full h-12 border rounded-lg border-gray-200 dark:border-gray-700 overflow-hidden"></div>
 
         <script>
             setTimeout(() => {
@@ -45,13 +44,6 @@
             }, 0);
         </script>
     </div>
-
-    <style>
-        #a2a-connection-example {
-            width: 100%;
-            height: 3em;
-        }
-    </style>
 
 </body>
 

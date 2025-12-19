@@ -6,22 +6,22 @@ const modalStack = [];
 
 // Create a single backdrop for all modals
 const backdrop = document.createElement("div");
-backdrop.className = "modal-backdrop";
+backdrop.className = "fixed inset-0 z-40 bg-gray-900/50 dark:bg-gray-900/80 backdrop-blur-sm transition-opacity";
 backdrop.style.display = "none";
-backdrop.style.backdropFilter = "blur(5px)";
+// backdrop.style.backdropFilter = "blur(5px)"; // Handled by backdrop-blur-sm
 document.body.appendChild(backdrop);
 
 // Function to update z-index for all modals and backdrop
 function updateModalZIndexes() {
   // Base z-index for modals
-  const baseZIndex = 3000;
+  const baseZIndex = 50; // Flowbite defaults to 50
 
   // Update z-index for all modals
   modalStack.forEach((modal, index) => {
     // For first modal, z-index is baseZIndex
     // For second modal, z-index is baseZIndex + 20
-    // This leaves room for the backdrop between them
-    modal.element.style.zIndex = baseZIndex + index * 20;
+    // This leaves room for the backdrop between them if needed, though we use one backdrop
+    modal.element.style.zIndex = baseZIndex + index * 2;
   });
 
   // Always show backdrop
@@ -30,8 +30,8 @@ function updateModalZIndexes() {
   if (modalStack.length > 1) {
     // For multiple modals, position backdrop between the top two
     const topModalIndex = modalStack.length - 1;
-    const previousModalZIndex = baseZIndex + (topModalIndex - 1) * 20;
-    backdrop.style.zIndex = previousModalZIndex + 10;
+    const previousModalZIndex = baseZIndex + (topModalIndex - 1) * 2;
+    backdrop.style.zIndex = previousModalZIndex + 1;
   } else if (modalStack.length === 1) {
     // For single modal, position backdrop below it
     backdrop.style.zIndex = baseZIndex - 1;
@@ -45,7 +45,8 @@ function updateModalZIndexes() {
 function createModalElement(path) {
   // Create modal element
   const newModal = document.createElement("div");
-  newModal.className = "modal";
+  // Flowbite modal wrapper classes
+  newModal.className = "fixed top-0 left-0 right-0 z-50 hidden w-full p-4 overflow-x-hidden overflow-y-auto md:inset-0 h-[calc(100%-1rem)] max-h-full justify-center items-center flex";
   newModal.path = path; // save name to the object
 
   // Add click handlers to only close modal if both mousedown and mouseup are on the modal container
@@ -63,15 +64,26 @@ function createModalElement(path) {
 
   // Create modal structure
   newModal.innerHTML = `
-    <div class="modal-inner">
-      <div class="modal-header">
-        <h2 class="modal-title"></h2>
-        <button class="modal-close">&times;</button>
+    <div class="relative w-full max-w-2xl max-h-full">
+      <!-- Modal content -->
+      <div class="relative bg-white rounded-lg shadow dark:bg-gray-700 flex flex-col max-h-[calc(100vh-2rem)]">
+        <!-- Modal header -->
+        <div class="flex items-start justify-between p-4 border-b rounded-t dark:border-gray-600 shrink-0">
+          <h3 class="text-xl font-semibold text-gray-900 dark:text-white modal-title"></h3>
+          <button type="button" class="modal-close text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ml-auto inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white">
+            <svg class="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
+                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"/>
+            </svg>
+            <span class="sr-only">Close modal</span>
+          </button>
+        </div>
+        <!-- Modal body -->
+        <div class="p-6 space-y-6 overflow-y-auto modal-scroll">
+          <div class="modal-bd"></div>
+        </div>
+        <!-- Modal footer slot -->
+        <div class="modal-footer-slot shrink-0 hidden"></div>
       </div>
-      <div class="modal-scroll">
-        <div class="modal-bd"></div>
-      </div>
-      <div class="modal-footer-slot" style="display: none;"></div>
     </div>
   `;
 
@@ -83,9 +95,10 @@ function createModalElement(path) {
   // Add modal to DOM
   document.body.appendChild(newModal);
 
-  // Show the modal
-  newModal.classList.add("show");
-
+  // Show the modal (remove hidden, add flex)
+  newModal.classList.remove("hidden");
+  newModal.classList.add("flex");
+  
   // Update modal z-indexes
   updateModalZIndexes();
 
@@ -96,7 +109,7 @@ function createModalElement(path) {
     body: newModal.querySelector(".modal-bd"),
     close: close_button,
     footerSlot: newModal.querySelector(".modal-footer-slot"),
-    inner: newModal.querySelector(".modal-inner"),
+    inner: newModal.querySelector(".relative.w-full"), // Updated selector for inner
     styles: [],
     scripts: [],
   };
@@ -115,7 +128,7 @@ export function openModal(modalPath) {
       ).observe(document.body, { childList: true, subtree: true });
 
       // Set a loading state
-      modal.body.innerHTML = '<div class="loading">Loading...</div>';
+      modal.body.innerHTML = '<div class="flex items-center justify-center p-4"><div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div></div>';
 
       // Already added to stack above
 
@@ -130,7 +143,7 @@ export function openModal(modalPath) {
           // Set the title from the document
           modal.title.innerHTML = doc.title || modalPath;
           if (doc.html && doc.html.classList) {
-            const inner = modal.element.querySelector(".modal-inner");
+            const inner = modal.element.querySelector(".relative.w-full");
             if (inner) inner.classList.add(...doc.html.classList);
           }
           if (doc.body && doc.body.classList) {
@@ -144,21 +157,23 @@ export function openModal(modalPath) {
             if (componentFooter && modal.footerSlot) {
               // Move footer outside modal-scroll scrollable area
               modal.footerSlot.appendChild(componentFooter);
-              modal.footerSlot.style.display = 'block';
-              modal.inner.classList.add('modal-with-footer');
+              modal.footerSlot.classList.remove('hidden');
+              modal.footerSlot.style.display = 'block'; // Ensure display block if specific styles needed
+              // modal.inner.classList.add('modal-with-footer'); // No longer needed with flex col layout
             }
           });
         })
         .catch((error) => {
           console.error("Error loading modal content:", error);
-          modal.body.innerHTML = `<div class="error">Failed to load modal content: ${error.message}</div>`;
+          modal.body.innerHTML = `<div class="p-4 mb-4 text-sm text-red-800 rounded-lg bg-red-50 dark:bg-gray-800 dark:text-red-400">Failed to load modal content: ${error.message}</div>`;
         });
 
       // Add modal to stack and show it
       // Add modal to stack
       modal.path = modalPath;
       modalStack.push(modal);
-      modal.element.classList.add("show");
+      modal.element.classList.remove("hidden");
+      modal.element.classList.add("flex");
       document.body.style.overflow = "hidden";
 
       // Update modal z-indexes
@@ -200,28 +215,8 @@ export function closeModal(modalPath = null) {
   });
 
   // First remove the show class to trigger the transition
-  modal.element.classList.remove("show");
-
-  // commented out to prevent race conditions
-
-  // // Remove the modal element from DOM after animation
-  // modal.element.addEventListener(
-  //   "transitionend",
-  //   () => {
-  //     // Make sure the modal is completely removed from the DOM
-  //     if (modal.element.parentNode) {
-  //       modal.element.parentNode.removeChild(modal.element);
-  //     }
-  //   },
-  //   { once: true }
-  // );
-
-  // // Fallback in case the transition event doesn't fire
-  // setTimeout(() => {
-  //   if (modal.element.parentNode) {
-  //     modal.element.parentNode.removeChild(modal.element);
-  //   }
-  // }, 500); // 500ms should be enough for the transition to complete
+  modal.element.classList.remove("flex");
+  modal.element.classList.add("hidden");
 
   // remove immediately
   if (modal.element.parentNode) {
